@@ -37,6 +37,8 @@ loginRouter.post("/", async (req, res, next) => {
         console.log("Session:");
         console.log(req.session);
         res.status(200).send(JSON.stringify({
+            redirect: "/",
+            authenticated: req.session.authenticated,
             username: req.session.user.username
         }));
     }

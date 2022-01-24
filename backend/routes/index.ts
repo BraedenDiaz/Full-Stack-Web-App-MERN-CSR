@@ -7,6 +7,8 @@ import express from "express";
 export const indexRouter = express.Router();
 
 indexRouter.get("/", (req, res, next) => {
-    res.status(200);
-    res.send("<h1>This is the home page!</h1>");
+    res.status(200).json({
+        authenticated: req.session.authenticated,
+        username: req.session.user?.username
+    });
 });

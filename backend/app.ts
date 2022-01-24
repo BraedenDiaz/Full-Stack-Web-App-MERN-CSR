@@ -14,7 +14,10 @@ import { WEB_SERVER_PORT,
         SESSION_SECRET,
         SESSION_COOKIE_EXPIRATION,
         SESSION_COOKIE_SECURE,
-        SESSION_COOKIE_SAME_SITE } from "./config/config";
+        SESSION_COOKIE_SAME_SITE, 
+        SESSION_COOKIE_DOMAIN,
+        SESSION_COOKIE_PATH,
+        SESSION_COOKIE_HTTP_ONLY} from "./config/config";
 
 
 declare module "express-session" {
@@ -35,7 +38,7 @@ declare module "express-session" {
 
 const app = express();
 
-const store : MongoStore = MongoStore.create({
+const mongoDBStore : MongoStore = MongoStore.create({
     // Reuse our Mongoose connection
     clientPromise: mongooseConnectionClientPromise,
     crypto: {
@@ -46,21 +49,25 @@ const store : MongoStore = MongoStore.create({
 
 
 app.use(cors({
-    origin: FRONT_END_HOST
+    origin: FRONT_END_HOST,
+    credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(session({
     secret: SESSION_SECRET,
     cookie: {
+        domain: SESSION_COOKIE_DOMAIN,
+        path: SESSION_COOKIE_PATH,
+        httpOnly: SESSION_COOKIE_HTTP_ONLY,
         maxAge: SESSION_COOKIE_EXPIRATION,
         secure: SESSION_COOKIE_SECURE,
         sameSite: SESSION_COOKIE_SAME_SITE
     },
-    store: store,
+    store: mongoDBStore,
     resave: false,
     saveUninitialized: false
-}))
+}));
 
 app.use("/", indexRouter);
 app.use("/register", registerRouter);
