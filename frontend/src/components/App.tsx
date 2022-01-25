@@ -5,6 +5,14 @@ import Home from "./Home";
 import Layout from "./Layout";
 import LoginRegisterPage from "./loginRegister/index";
 
+/**
+ * @author Braeden Diaz
+ * 
+ * Main application functional component which contains the top-level React Router route 
+ * components and renders them along with their corresponding page component once they are
+ * navigated to by the user.
+ */
+
 function App() {
   return (
     <Router>

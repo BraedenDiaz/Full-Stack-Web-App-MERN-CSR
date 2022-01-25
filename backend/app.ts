@@ -4,9 +4,10 @@ import cors from "cors";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 
-import { indexRouter } from "./routes/index";
-import { loginRouter } from "./routes/Login";
-import { registerRouter } from "./routes/Register";
+import indexRouter  from "./routes/index";
+import registerRouter  from "./routes/Register";
+import loginRouter  from "./routes/Login";
+import logoutRouter from "./routes/Logout";
 
 import mongooseConnectionClientPromise from "./config/db";
 import { WEB_SERVER_PORT,
@@ -38,6 +39,7 @@ declare module "express-session" {
 
 const app = express();
 
+// Setup our MongoSB Store for use as our session store (see the session middleware)
 const mongoDBStore : MongoStore = MongoStore.create({
     // Reuse our Mongoose connection
     clientPromise: mongooseConnectionClientPromise,
@@ -47,7 +49,7 @@ const mongoDBStore : MongoStore = MongoStore.create({
 
 });
 
-
+// Setup out third-party middlewares
 app.use(cors({
     origin: FRONT_END_HOST,
     credentials: true
@@ -69,10 +71,14 @@ app.use(session({
     saveUninitialized: false
 }));
 
+
+// Setup our router middlewares
 app.use("/", indexRouter);
 app.use("/register", registerRouter);
 app.use("/login", loginRouter);
+app.use("/logout", logoutRouter);
 
+// Start the server
 app.listen(WEB_SERVER_PORT, () => {
     console.log(`Server listening on port ${WEB_SERVER_PORT}...`);
 });

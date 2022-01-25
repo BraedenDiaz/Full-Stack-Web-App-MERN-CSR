@@ -1,73 +1,72 @@
-import React from "react";
+import { useState } from "react";
+
 import { registerUser } from "../../api/LoginRegister";
 
-type RegisterProps = {};
-type RegisterState = { usernameValue: string, passwordValue: string };
+type PropsType = {
+    setActiveTab: (arg : string) => void
+};
 
-export default class Register extends React.Component<RegisterProps, RegisterState>
+/**
+ * @author Braeden Diaz
+ * 
+ * Functional component which represents the registration form.
+ */
+
+export default function Register(props : PropsType)
 {
-    constructor(props : RegisterProps)
-    {
-        super(props);
-        this.state = {
-            usernameValue: "",
-            passwordValue: ""
-        };
+    const [usernameValue, setUsername] = useState("");
+    const [passwordValue, setPassword] = useState("");
 
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
-
-    handleChange(event : any) : void
-    {
+    const handleChange = (event : any) => {
         switch (event.target.id)
         {
             case "registerUsername":
-                this.setState({usernameValue: event.target.value});
+                setUsername(event.target.value);
                 break;
             case "registerPassword":
-                this.setState({passwordValue: event.target.value});
+                setPassword(event.target.value);
                 break;
         }
+    };
 
-    }
-
-    async handleSubmit(event : any) : Promise<void>
-    {
+    const handleSubmit = async (event : any) => {
         event.preventDefault();
 
-        const responseText = await registerUser(this.state.usernameValue, this.state.passwordValue);
-        console.log("Server Response:");
-        console.log(responseText);
-    }
+        const responseObj = await registerUser(usernameValue, passwordValue);
+        console.log("Server Response to Register:");
+        console.log(responseObj.json);
 
-    render()
-    {
-        return (
-            <div className="container mt-3 mb-3">
-                <h1>Register</h1>
-                <form onSubmit={this.handleSubmit}>
-                    <div className="mb-3 mt-3">
-                        <label htmlFor="registerUsername" className="form-label">Username:</label>
-                        <input type="text"
-                                id="registerUsername"
-                                name="registerUsername"
-                                className="form-control"
-                                placeholder="Username"
-                                onChange={this.handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="registerPassword" className="form-label">Password:</label>
-                        <input type="password"
-                               id="registerPassword"
-                               name="registerPassword"
-                               className="form-control"
-                               placeholder="Password"
-                               onChange={this.handleChange} />
-                    </div>
-                    <button type="submit" className="btn btn-primary">Register</button>
-                </form>
-            </div>
-        );
-    }
+        if (responseObj.status === 201)
+        {
+            console.log("STATUS 201");
+            props.setActiveTab("login");
+        }
+    };
+
+    return (
+        <div className="container mt-3 mb-3">
+            <h1>Register</h1>
+            <form onSubmit={handleSubmit}>
+                <div className="mb-3 mt-3">
+                    <label htmlFor="registerUsername" className="form-label">Username:</label>
+                    <input type="text"
+                            id="registerUsername"
+                            name="registerUsername"
+                            className="form-control"
+                            placeholder="Username"
+                            onChange={handleChange} />
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="registerPassword" className="form-label">Password:</label>
+                    <input type="password"
+                           id="registerPassword"
+                           name="registerPassword"
+                           className="form-control"
+                           placeholder="Password"
+                           onChange={handleChange} />
+                </div>
+                <button type="submit" className="btn btn-primary">Register</button>
+            </form>
+        </div>
+    );
 }

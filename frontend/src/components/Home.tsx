@@ -1,13 +1,18 @@
-import React from "react";
+import { useUser } from "./Layout";
 
-export default class Home extends React.Component
+/**
+ * @author Braeden Diaz
+ * 
+ * Functional component which represents the home page of the web app.
+ */
+
+export default function Home()
 {
-    render()
-    {
-        return (
-            <div>
-                <h1>Welcome to the Homepage!</h1>
-            </div>
-        );
-    }
+    const [user] = useUser();
+
+    return (
+        <div>
+            <h1>Welcome to the Homepage {user ? user.username : "Guest"}!</h1>
+        </div>
+    );
 }

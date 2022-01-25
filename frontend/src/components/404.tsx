@@ -1,4 +1,9 @@
 
+/**
+ * @author Braeden Diaz
+ * 
+ * A simple functional component use for 404 errors.
+ */
 
 export default function FileNotFound()
 {

@@ -1,0 +1,29 @@
+[33mcommit 6f71e50189771b321005fca36860c9c555190f2c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Braeden Diaz <braedendiaz@gmail.com>
+Date:   Sun Jan 23 01:52:14 2022 -0700
+
+    Added use of environment variables for configurations. Added connection functionality to a MongoDB server and database using Mongoose. Started creation of a database API based on Mongoose, it currently finds existing users and inserts new users. Added authentication functions to salt, hash, and verify user passwords. Added session middleware with express-session that utilizes MongoDB as the session store. Sessions are successfully created on user login but the cookies are not sent to the client for some reason.
+
+[33mcommit a6ddb2b8ffe4877860d2e8a6940244125fc719bd[m
+Author: Braeden Diaz <braedendiaz@gmail.com>
+Date:   Fri Jan 21 21:12:52 2022 -0700
+
+    Integrated CORS and HTTP body parsing middlewares in the back-end. Web app successfully sends user registration infomration to the server which also sends a generic response back to the client.
+
+[33mcommit 3b9c527805d7836ce9aa764ab210aff50d21b667[m
+Author: Braeden Diaz <braedendiaz@gmail.com>
+Date:   Thu Jan 20 23:45:23 2022 -0700
+
+    Completed a basic website layout and navigation bar. Created a web page used for registering a new user and logging in along with their React components.
+
+[33mcommit a41cbbfbbf7fd03a4f9463b78a53a1f1563aa8c8[m
+Author: Braeden Diaz <braedendiaz@gmail.com>
+Date:   Wed Jan 19 21:19:52 2022 -0700
+
+    Added mongodb and react-router-dom dependencies along with their corresponding TypeScript types. Created a basic front-end interface utlizing React Router routing.
+
+[33mcommit dd83d273ee99c477b20c663c82b349f80edd5b7b[m
+Author: Braeden Diaz <braedendiaz@gmail.com>
+Date:   Tue Jan 18 01:08:41 2022 -0700
+
+    Initialize project using Create React App including TypeScript and Bootstrap for the front-end. Also completed setup of an Express back-end also with TypeScript and a basic working homepage.

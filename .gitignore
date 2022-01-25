@@ -29,5 +29,8 @@
 # dependencies
 /backend/node_modules
 
+# development
+/backend/.env
+
 # production
 /backend/build
