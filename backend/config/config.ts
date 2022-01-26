@@ -52,7 +52,8 @@ if (process.env.SESSION_COOKIE_SECURE !== undefined || process.env.SESSION_COOKI
     SESSION_COOKIE_SECURE = Boolean(Number(process.env.SESSION_COOKIE_SECURE));
 }
 
-export const SESSION_COOKIE_SAME_SITE : any  = process.env.SESSION_COOKIE_SAME_SITE || "strict";
+// Uses type of "any" as express-session has an odd type for the same-site cookie property
+export const SESSION_COOKIE_SAME_SITE : any = process.env.SESSION_COOKIE_SAME_SITE || "strict";
 
 // Based on the specification of cookie headers, if the same-site cookie header is "none",
 // then the "secure" cookie header must be true for added security. Again, this only applies
@@ -61,3 +62,7 @@ if (SESSION_COOKIE_SAME_SITE === "none" && SESSION_COOKIE_SECURE !== true)
 {
     throw new Error("SESSION_COOKIE_SECURE must be true if SESSION_COOKIE_SAME_SITE is set to 'none'.");
 }
+
+// User Password Requirements Configuration
+export const MIN_PASSWORD_LENGTH : number = Number(process.env.MIN_PASSWORD_LENGTH) || 12;
+export const MAX_PASSWORD_LENGTH : number = Number(process.env.MAX_PASSWORD_LENGTH) || 100;

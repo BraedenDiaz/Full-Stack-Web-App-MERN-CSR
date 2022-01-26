@@ -1,6 +1,7 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { API_ENDPOINT } from "../../api";
 import { registerUser } from "../../api/LoginRegister";
+import { useContext } from "../Layout";
 
 type PropsType = {
     setActiveTab: (arg : string) => void
@@ -16,6 +17,7 @@ export default function Register(props : PropsType)
 {
     const [usernameValue, setUsername] = useState("");
     const [passwordValue, setPassword] = useState("");
+    const csrfToken = useContext()[2];
 
     const handleChange = (event : any) => {
         switch (event.target.id)
@@ -32,7 +34,7 @@ export default function Register(props : PropsType)
     const handleSubmit = async (event : any) => {
         event.preventDefault();
 
-        const responseObj = await registerUser(usernameValue, passwordValue);
+        const responseObj = await registerUser(usernameValue, passwordValue, csrfToken);
         console.log("Server Response to Register:");
         console.log(responseObj.json);
 
@@ -47,6 +49,7 @@ export default function Register(props : PropsType)
         <div className="container mt-3 mb-3">
             <h1>Register</h1>
             <form onSubmit={handleSubmit}>
+                <input type="hidden" name="_csrf" value={csrfToken} />
                 <div className="mb-3 mt-3">
                     <label htmlFor="registerUsername" className="form-label">Username:</label>
                     <input type="text"

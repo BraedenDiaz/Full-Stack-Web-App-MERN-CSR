@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { useUser } from "../Layout";
+import { useContext } from "../Layout";
 import Login from "./Login";
 import Register from "./Register";
 
@@ -12,7 +12,7 @@ import Register from "./Register";
 
 export default function LoginRegisterPage()
 { 
-    const [user] = useUser();
+    const [user] = useContext();
     const [activeTab, setActiveTab] = useState("login");
 
     const handleTabChange = (newTab : string) => {

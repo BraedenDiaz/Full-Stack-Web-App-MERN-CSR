@@ -1,6 +1,8 @@
 import express from "express";
+import { check, validationResult } from "express-validator";
 import { getUser } from "../api/db";
-import { authenticatePassword } from "../helpers/authentication";
+import { authenticatePassword, hasNoSpaceCharacters } from "../helpers/authentication";
+import { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } from "../config/config";
 
 /**
  * @author Braeden Diaz
@@ -14,7 +16,30 @@ import { authenticatePassword } from "../helpers/authentication";
 const loginRouter = express.Router();
 
 // Handle the POST request for logging in a user
-loginRouter.post("/", async (req, res, next) => {
+// We also use middleware to validate and santizie user input on this route as well
+loginRouter.post("/", check("username").custom(hasNoSpaceCharacters)
+                                       .isAscii()
+                                       .withMessage("Username must use ASCII characters only.")
+                                       .stripLow()
+                                       .escape(),
+                    check("password").custom(hasNoSpaceCharacters)
+                                       .isAscii()
+                                       .withMessage("Username must use ASCII characters only.")
+                                       .isLength({ min: MIN_PASSWORD_LENGTH, max: MAX_PASSWORD_LENGTH})
+                                       .withMessage(`Password must be a length between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters.`)
+                                       .stripLow()
+                                       .escape(),
+                                       async (req, res, next) => {
+    
+    // Make sure all our input validations have passed, if not, send
+    // an error response.
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+    {
+        return res.status(400).json({
+            errors: errors.array()
+        });
+    }
 
     // Retrieve, the provided username and password from the request.
     const { body } = req;

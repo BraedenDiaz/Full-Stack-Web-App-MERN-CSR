@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { CustomValidator } from "express-validator";
 import { SALT_ROUNDS } from "../config/config";
 
 /**
@@ -35,3 +36,12 @@ export async function authenticatePassword(password : string, hash : string) : P
 
     return false;
 }
+
+export const hasNoSpaceCharacters : CustomValidator = (value) => {
+    if (/\s/.test(value))
+    {
+        throw new Error("Space characters are not allowed.");
+    }
+
+    return true;
+};

@@ -1,6 +1,6 @@
-import { useState } from "react";
-
-import { useUser } from "../Layout";
+import { useState, useEffect } from "react";
+import { API_ENDPOINT } from "../../api";
+import { useContext } from "../Layout";
 import { loginUser } from "../../api/LoginRegister";
 
 type PropsType = {};
@@ -13,9 +13,10 @@ type PropsType = {};
 
 export default function Login(props : PropsType)
 {
-    const setUser = useUser()[1];
+    const setUser = useContext()[1];
     const [usernameValue, setUsername] = useState("");
     const [passwordValue, setPassword] = useState("");
+    const csrfToken = useContext()[2];
 
     const handleChange = (event : any) => {
         switch (event.target.id)
@@ -32,7 +33,7 @@ export default function Login(props : PropsType)
     const handleSubmit = (event : any) => {
         event.preventDefault();
 
-        loginUser(usernameValue, passwordValue)
+        loginUser(usernameValue, passwordValue, csrfToken)
         .then(responseJSON => {
             console.log("Server Response to Login:");
             console.log(responseJSON);
@@ -52,6 +53,7 @@ export default function Login(props : PropsType)
         <div className="container mt-3 mb-3">
             <h1>Login</h1>
             <form onSubmit={handleSubmit}>
+                <input type="hidden" name="_csrf" value={csrfToken} />
                 <div className="mb-3 mt-3">
                     <label htmlFor="loginUsername" className="form-label">Username:</label>
                     <input type="text"

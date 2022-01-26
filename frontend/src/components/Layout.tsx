@@ -5,7 +5,7 @@ import { API_ENDPOINT } from "../api/index";
 
 type PropsType = object;
 type User = { authenticated: boolean, username: string };
-type ContextType = [  (User | null), React.Dispatch<React.SetStateAction<User | null>> ];
+type ContextType = [  (User | null), React.Dispatch<React.SetStateAction<User | null>>, string ];
 
 /**
  * @author Braeden Diaz
@@ -20,7 +20,9 @@ type ContextType = [  (User | null), React.Dispatch<React.SetStateAction<User | 
 
 export default function Layout(props : PropsType)
 {
+    // Top-Level state that will be shared with all child components
     const [user, setUser] = useState<User | null>(null);
+    const [csrfToken, setCSRFToken] = useState("");
 
     // Effect which runs on every render that check with the
     // server to see if the user is still authenticated.
@@ -29,6 +31,10 @@ export default function Layout(props : PropsType)
     // routes for the website.
     useEffect(() => {
         fetch(`${API_ENDPOINT}/`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
             credentials: "include"
         })
         .then(responseMessage => responseMessage.json())
@@ -50,9 +56,29 @@ export default function Layout(props : PropsType)
         });
     }, []);
 
+    // Make a request to obtain our CSRF token
+    useEffect(() => {
+        fetch(`${API_ENDPOINT}/csrf`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include"
+        })
+        .then(responseMessage => responseMessage.json())
+        .then(responseJSON => {
+            const { csrfToken } = responseJSON;
+            setCSRFToken(csrfToken);
+        });
+    }, []);
+
     const handleLogout = () => {
         fetch(`${API_ENDPOINT}/logout`, {
             method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "XSRF-TOKEN": csrfToken
+            },
             credentials: "include"
         })
         .then(response => {
@@ -104,7 +130,7 @@ export default function Layout(props : PropsType)
                     </div>
                 </div>
             </nav>
-            <Outlet context={[user, setUser]} />
+            <Outlet context={[user, setUser, csrfToken]} />
             <div className="p-3 bg-primary text-white">
                 <h1 className="display-6 text-center">This is the footer.</h1>
             </div>
@@ -112,7 +138,7 @@ export default function Layout(props : PropsType)
     );
 }
 
-export function useUser()
+export function useContext()
 {
     return useOutletContext<ContextType>();
 }

@@ -1,7 +1,10 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import hpp from "hpp";
 import session from "express-session";
+import csurf from "csurf";
 import MongoStore from "connect-mongo";
 
 import indexRouter  from "./routes/index";
@@ -50,12 +53,25 @@ const mongoDBStore : MongoStore = MongoStore.create({
 });
 
 // Setup out third-party middlewares
+
 app.use(cors({
     origin: FRONT_END_HOST,
     credentials: true
 }));
+
+// Sets various security-based HTTP headers to help protect against common
+// attacks such as some Cross-Site-Scripting attacks.
+app.use(helmet());
+
+// Parse and urlencode the received HTTP body data
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+
+// For protecting against HTTP Parameter Pollution attacks
+// This must be placed after the urlencoded body parsing
+app.use(hpp());
+
+// Setup our espress-session middleware and session cookie
 app.use(session({
     secret: SESSION_SECRET,
     cookie: {
@@ -71,12 +87,37 @@ app.use(session({
     saveUninitialized: false
 }));
 
+// Setup our CSRF protection on all routes
+// This is places after our express-session middleware which will
+// be used by csurf to store our CSRF tokens.
+app.use(csurf());
+
+// Send a CSRF token when requested
+app.get("/csrf", (req, res, next) => {
+    res.status(200).send({
+        csrfToken: req.csrfToken()
+    });
+});
+
 
 // Setup our router middlewares
 app.use("/", indexRouter);
 app.use("/register", registerRouter);
 app.use("/login", loginRouter);
 app.use("/logout", logoutRouter);
+
+app.use((err : any, req : express.Request, res : express.Response, next : express.NextFunction) => {
+    if (err.code === "EBADCSRFTOKEN")
+    {
+        res.status(403).json({
+            error: "Invalid CSRF Token!"
+        });
+    }
+    else
+    {
+        next();
+    }
+});
 
 // Start the server
 app.listen(WEB_SERVER_PORT, () => {

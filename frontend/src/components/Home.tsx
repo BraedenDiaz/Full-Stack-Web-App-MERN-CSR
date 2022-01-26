@@ -1,4 +1,4 @@
-import { useUser } from "./Layout";
+import { useContext } from "./Layout";
 
 /**
  * @author Braeden Diaz
@@ -8,7 +8,7 @@ import { useUser } from "./Layout";
 
 export default function Home()
 {
-    const [user] = useUser();
+    const [user] = useContext();
 
     return (
         <div>

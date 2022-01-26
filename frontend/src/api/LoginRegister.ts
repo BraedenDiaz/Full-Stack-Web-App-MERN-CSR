@@ -6,7 +6,7 @@ import { API_ENDPOINT } from ".";
  * API for interacting with the server to perform user registration and login functionality.
  */
 
-export const registerUser = async (username : string, password : string) : Promise<any> => {
+export const registerUser = async (username : string, password : string, csrfToken : any) : Promise<any> => {
     const newUser : object = {
         username: username,
         password: password
@@ -15,7 +15,8 @@ export const registerUser = async (username : string, password : string) : Promi
     const response : Response = await fetch(`${API_ENDPOINT}/register`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "XSRF-TOKEN": csrfToken
         },
         credentials: "include",
         body: JSON.stringify(newUser)
@@ -29,7 +30,7 @@ export const registerUser = async (username : string, password : string) : Promi
     return responseMessage;
 };
 
-export const loginUser = async(username : string, password : string) : Promise<any> => {
+export const loginUser = async(username : string, password : string, csrfToken : any) : Promise<any> => {
     const userObj : object = {
         username : username,
         password : password
@@ -38,7 +39,8 @@ export const loginUser = async(username : string, password : string) : Promise<a
     const response : Response = await fetch(`${API_ENDPOINT}/login`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "XSRF-TOKEN": csrfToken
         },
         credentials: "include",
         body: JSON.stringify(userObj)
