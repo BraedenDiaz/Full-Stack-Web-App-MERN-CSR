@@ -42,33 +42,17 @@ export default function Layout(props : PropsType)
             console.log("Response to Layout:");
             console.log(responseJSON);
 
-            if (!responseJSON.authenticated)
-            {
-                setUser(null);
-            }
-            else
+            const { authenticated, csrfToken, username } = responseJSON;
+
+            setCSRFToken(csrfToken);
+
+            if (authenticated)
             {
                 setUser({
-                    authenticated: responseJSON.authenticated,
-                    username: responseJSON.username 
+                    authenticated: authenticated,
+                    username: username 
                 });
             }
-        });
-    }, []);
-
-    // Make a request to obtain our CSRF token
-    useEffect(() => {
-        fetch(`${API_ENDPOINT}/csrf`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include"
-        })
-        .then(responseMessage => responseMessage.json())
-        .then(responseJSON => {
-            const { csrfToken } = responseJSON;
-            setCSRFToken(csrfToken);
         });
     }, []);
 

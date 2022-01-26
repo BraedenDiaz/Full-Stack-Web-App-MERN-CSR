@@ -92,14 +92,6 @@ app.use(session({
 // be used by csurf to store our CSRF tokens.
 app.use(csurf());
 
-// Send a CSRF token when requested
-app.get("/csrf", (req, res, next) => {
-    res.status(200).send({
-        csrfToken: req.csrfToken()
-    });
-});
-
-
 // Setup our router middlewares
 app.use("/", indexRouter);
 app.use("/register", registerRouter);
