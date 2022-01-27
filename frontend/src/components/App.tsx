@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import FileNotFound from "./404";
+import FileNotFound from "./errors/404";
 import Home from "./Home";
 import Layout from "./Layout";
 import LoginRegisterPage from "./loginRegister/index";

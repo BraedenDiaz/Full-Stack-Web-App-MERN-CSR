@@ -102,7 +102,9 @@ app.use((err : any, req : express.Request, res : express.Response, next : expres
     if (err.code === "EBADCSRFTOKEN")
     {
         res.status(403).json({
-            error: "Invalid CSRF Token!"
+            errors: [{
+                msg: "Invalid CSRF Token!"
+            }]
         });
     }
     else

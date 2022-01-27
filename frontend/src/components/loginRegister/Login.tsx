@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { API_ENDPOINT } from "../../api";
+import { useState } from "react";
 import { useContext } from "../Layout";
 import { loginUser } from "../../api/LoginRegister";
+import FormError from "../errors/FormError";
 
 type PropsType = {};
 
@@ -18,6 +18,11 @@ export default function Login(props : PropsType)
     const [passwordValue, setPassword] = useState("");
     const csrfToken = useContext()[2];
 
+    const [errorState, setErrorState] = useState({
+        show: false,
+        errorsArr: []
+    });
+
     const handleChange = (event : any) => {
         switch (event.target.id)
         {
@@ -30,27 +35,44 @@ export default function Login(props : PropsType)
         }
     };
 
-    const handleSubmit = (event : any) => {
+    const handleSubmit = async (event : any) => {
         event.preventDefault();
 
-        loginUser(usernameValue, passwordValue, csrfToken)
-        .then(responseJSON => {
-            console.log("Server Response to Login:");
-            console.log(responseJSON);
+        const responseObj = await loginUser(usernameValue, passwordValue, csrfToken);
 
-            if (responseJSON.authenticated)
+        console.log("Server Response to Login:");
+        console.log(responseObj);
+
+        if (responseObj.status === 200)
+        {
+            if (responseObj.json.authenticated)
             {
                 setUser({
-                    authenticated: responseJSON.authenticated,
-                    username: responseJSON.username
+                    authenticated: responseObj.json.authenticated,
+                    username: responseObj.json.username
+                });
+
+                setErrorState({
+                    show: false,
+                    errorsArr: []
                 });
             }
-            
-        });
+        }
+        else
+        {
+            setErrorState({
+                show: true,
+                errorsArr: responseObj.json.errors.map((errorObj : any) => {
+                    return errorObj.msg;
+                })
+            })
+        }
+        
     };
 
     return (
         <div className="container mt-3 mb-3">
+            <FormError show={errorState.show} errorsArr={errorState.errorsArr} />
             <h1>Login</h1>
             <form onSubmit={handleSubmit}>
                 <input type="hidden" name="_csrf" value={csrfToken} />

@@ -24,8 +24,8 @@ export default function Layout(props : PropsType)
     const [user, setUser] = useState<User | null>(null);
     const [csrfToken, setCSRFToken] = useState("");
 
-    // Effect which runs on every render that check with the
-    // server to see if the user is still authenticated.
+    // Effect which runs only on the first render that checks with
+    // the server to see if the user is still authenticated.
     //
     // This is needed because this layout is re-rendered on multiple
     // routes for the website.

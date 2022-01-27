@@ -70,8 +70,10 @@ registerRouter.post("/", check("username").custom(hasNoSpaceCharacters) // Make 
     {
         // Send an error response message if the insertion failed.
         // This typically happens if a user already exists.
-        res.status(200).json({
-            error: err.message
+        res.status(400).json({
+            errors: [{
+                msg: err
+            }]
         });
         return;
     }

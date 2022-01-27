@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { API_ENDPOINT } from "../../api";
+import { useState } from "react";
+import FormError from "../errors/FormError";
 import { registerUser } from "../../api/LoginRegister";
 import { useContext } from "../Layout";
 
@@ -19,6 +19,11 @@ export default function Register(props : PropsType)
     const [passwordValue, setPassword] = useState("");
     const csrfToken = useContext()[2];
 
+    const [errorState, setErrorState] = useState({
+        show: false,
+        errorsArr: []
+    });
+
     const handleChange = (event : any) => {
         switch (event.target.id)
         {
@@ -36,17 +41,31 @@ export default function Register(props : PropsType)
 
         const responseObj = await registerUser(usernameValue, passwordValue, csrfToken);
         console.log("Server Response to Register:");
-        console.log(responseObj.json);
+        console.log(responseObj);
 
         if (responseObj.status === 201)
         {
-            console.log("STATUS 201");
             props.setActiveTab("login");
+
+            setErrorState({
+                show: false,
+                errorsArr: []
+            });
+        }
+        else
+        {
+            setErrorState({
+                show: true,
+                errorsArr: responseObj.json.errors.map((errorObj : any) => {
+                    return errorObj.msg;
+                })
+            });
         }
     };
 
     return (
         <div className="container mt-3 mb-3">
+            <FormError show={errorState.show} errorsArr={errorState.errorsArr} />
             <h1>Register</h1>
             <form onSubmit={handleSubmit}>
                 <input type="hidden" name="_csrf" value={csrfToken} />

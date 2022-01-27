@@ -52,8 +52,10 @@ loginRouter.post("/", check("username").custom(hasNoSpaceCharacters)
     // If the user does not exist in the database, send an error response message
     if (dbResult === null)
     {
-        res.status(200).json({
-            error: "User Does not Exist"
+        res.status(400).json({
+            errors: [{
+                msg: "User Does not Exist"
+            }]
         });
         return;
     }
@@ -80,8 +82,10 @@ loginRouter.post("/", check("username").custom(hasNoSpaceCharacters)
     else
     {
         // If the password was not successfully authenticated, send a response message stating so
-        res.status(200).json({
-            error: "Wrong Password"
+        res.status(400).json({
+            errors: [{
+                msg: "Wrong Password"
+            }]
         });
         return;
     }

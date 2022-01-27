@@ -46,7 +46,10 @@ export const loginUser = async(username : string, password : string, csrfToken :
         body: JSON.stringify(userObj)
     });
 
-    const responseMessage : object = await response.json();
+    const responseMessage : object = {
+        status: response.status,
+        json: await response.json()
+    };
 
     return responseMessage;
 };
