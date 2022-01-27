@@ -17,7 +17,6 @@ const indexRouter = express.Router();
 indexRouter.get("/", (req, res, next) => {
     res.status(200).json({
         authenticated: req.session.authenticated,
-        csrfToken: req.csrfToken(),
         username: req.session.user?.username
     });
 });

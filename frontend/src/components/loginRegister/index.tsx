@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import { API_ENDPOINT } from "../../api";
 import { useContext } from "../Layout";
 import Login from "./Login";
 import Register from "./Register";
@@ -14,6 +15,21 @@ export default function LoginRegisterPage()
 { 
     const [user] = useContext();
     const [activeTab, setActiveTab] = useState("login");
+
+    const [csrfToken, setCSRFToken] = useState("");
+    useEffect(() => {
+        fetch(`${API_ENDPOINT}/login`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include"
+        })
+        .then(response => response.json())
+        .then(responseJSON => {
+            setCSRFToken(responseJSON.csrfToken);
+        });
+    }, []);
 
     const handleTabChange = (newTab : string) => {
         setActiveTab(newTab);
@@ -37,10 +53,10 @@ export default function LoginRegisterPage()
 
             <div className="tab-content">
                 <div id="loginForm" className={activeTab === "login" ? "tab-pane container active" : "tab-pane container fade"}>
-                    <Login />
+                    <Login csrfToken={csrfToken} />
                 </div>
                 <div id="registerForm" className={activeTab === "register" ? "tab-pane container active" : "tab-pane container fade"}>
-                    <Register setActiveTab={handleTabChange} />
+                    <Register setActiveTab={handleTabChange} csrfToken={csrfToken} />
                 </div>
             </div>
         </div>

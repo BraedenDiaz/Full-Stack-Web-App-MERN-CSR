@@ -4,7 +4,6 @@ import cors from "cors";
 import helmet from "helmet";
 import hpp from "hpp";
 import session from "express-session";
-import csurf from "csurf";
 import MongoStore from "connect-mongo";
 
 import indexRouter  from "./routes/index";
@@ -88,13 +87,14 @@ app.use(session({
 }));
 
 // Setup our CSRF protection on all routes
-// This is places after our express-session middleware which will
-// be used by csurf to store our CSRF tokens.
-app.use(csurf());
+// This is placed after our express-session middleware which will
+// be used by csurf to store our CSRF secret.
+//const csrfProtection = csurf();
 
 // Setup our router middlewares
+
 app.use("/", indexRouter);
-app.use("/register", registerRouter);
+app.use("/register" , registerRouter);
 app.use("/login", loginRouter);
 app.use("/logout", logoutRouter);
 

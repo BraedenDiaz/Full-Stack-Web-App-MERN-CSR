@@ -1,4 +1,5 @@
 import express from "express";
+import csurf from "csurf";
 import { check, validationResult } from "express-validator";
 import { hashAndSaltPassword, hasNoSpaceCharacters } from "../helpers/authentication";
 import { insertNewUser } from "../api/db";
@@ -15,10 +16,11 @@ import { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } from "../config/config";
 
 const registerRouter = express.Router();
 
+const csrfProtection = csurf();
 
 // Handle POST requests for registering a new user
 // We also use middleware to validate and santizie user input on this route as well
-registerRouter.post("/", check("username").custom(hasNoSpaceCharacters) // Make sure the input has no space characters
+registerRouter.post("/", csrfProtection, check("username").custom(hasNoSpaceCharacters) // Make sure the input has no space characters
                                          .isAscii()                     // Make sure the input has only ASCII characters
                                          .withMessage("Username must use ASCII characters only.")
                                          .stripLow()                    // Strip all the control-based ASCII characters

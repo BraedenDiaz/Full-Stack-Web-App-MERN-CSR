@@ -1,4 +1,5 @@
 import express from "express";
+import csurf from "csurf";
 import { check, validationResult } from "express-validator";
 import { getUser } from "../api/db";
 import { authenticatePassword, hasNoSpaceCharacters } from "../helpers/authentication";
@@ -15,9 +16,17 @@ import { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } from "../config/config";
 
 const loginRouter = express.Router();
 
+const csrfProtection = csurf();
+
+loginRouter.get("/", csrfProtection, (req, res, next) => {
+    res.status(200).json({
+        csrfToken: req.csrfToken()
+    });
+});
+
 // Handle the POST request for logging in a user
 // We also use middleware to validate and santizie user input on this route as well
-loginRouter.post("/", check("username").custom(hasNoSpaceCharacters)
+loginRouter.post("/", csrfProtection, check("username").custom(hasNoSpaceCharacters)
                                        .isAscii()
                                        .withMessage("Username must use ASCII characters only.")
                                        .stripLow()

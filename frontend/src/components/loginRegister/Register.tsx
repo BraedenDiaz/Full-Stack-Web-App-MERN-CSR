@@ -1,9 +1,9 @@
 import { useState } from "react";
 import FormError from "../errors/FormError";
 import { registerUser } from "../../api/LoginRegister";
-import { useContext } from "../Layout";
 
 type PropsType = {
+    csrfToken: string,
     setActiveTab: (arg : string) => void
 };
 
@@ -17,7 +17,6 @@ export default function Register(props : PropsType)
 {
     const [usernameValue, setUsername] = useState("");
     const [passwordValue, setPassword] = useState("");
-    const csrfToken = useContext()[2];
 
     const [errorState, setErrorState] = useState({
         show: false,
@@ -39,7 +38,7 @@ export default function Register(props : PropsType)
     const handleSubmit = async (event : any) => {
         event.preventDefault();
 
-        const responseObj = await registerUser(usernameValue, passwordValue, csrfToken);
+        const responseObj = await registerUser(usernameValue, passwordValue, props.csrfToken);
         console.log("Server Response to Register:");
         console.log(responseObj);
 
@@ -68,7 +67,6 @@ export default function Register(props : PropsType)
             <FormError show={errorState.show} errorsArr={errorState.errorsArr} />
             <h1>Register</h1>
             <form onSubmit={handleSubmit}>
-                <input type="hidden" name="_csrf" value={csrfToken} />
                 <div className="mb-3 mt-3">
                     <label htmlFor="registerUsername" className="form-label">Username:</label>
                     <input type="text"

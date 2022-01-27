@@ -5,7 +5,7 @@ import { API_ENDPOINT } from "../api/index";
 
 type PropsType = object;
 type User = { authenticated: boolean, username: string };
-type ContextType = [  (User | null), React.Dispatch<React.SetStateAction<User | null>>, string ];
+type ContextType = [  (User | null), React.Dispatch<React.SetStateAction<User | null>>];
 
 /**
  * @author Braeden Diaz
@@ -22,7 +22,6 @@ export default function Layout(props : PropsType)
 {
     // Top-Level state that will be shared with all child components
     const [user, setUser] = useState<User | null>(null);
-    const [csrfToken, setCSRFToken] = useState("");
 
     // Effect which runs only on the first render that checks with
     // the server to see if the user is still authenticated.
@@ -42,9 +41,7 @@ export default function Layout(props : PropsType)
             console.log("Response to Layout:");
             console.log(responseJSON);
 
-            const { authenticated, csrfToken, username } = responseJSON;
-
-            setCSRFToken(csrfToken);
+            const { authenticated, username } = responseJSON;
 
             if (authenticated)
             {
@@ -61,7 +58,6 @@ export default function Layout(props : PropsType)
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
-                "XSRF-TOKEN": csrfToken
             },
             credentials: "include"
         })
@@ -82,6 +78,17 @@ export default function Layout(props : PropsType)
         <div>
             <div className="p-5 bg-primary text-white">
                 <h1 className="display-2 text-center">A Website</h1>
+            </div>
+            <div className="offcanvas offcanvas-end" id="sidebar">
+                <div className="offcanvas-header">
+                    <h1 className="offcanvas-title">{user?.username}</h1>
+                    <button type="button" className="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+                </div>
+                <div className="offcanvas-body">
+                    <p>Some random text.</p>
+                    <p>Some more random text.</p>
+                    <button className="btn btn-primary" type="button" data-bs-dismiss="offcanvas" onClick={handleLogout}>Logout</button>
+                </div>
             </div>
             <nav className="navbar navbar-expand-sm bg-dark navbar-dark sticky-top">
                 <div className="container-fluid">
@@ -106,7 +113,9 @@ export default function Layout(props : PropsType)
                         <ul className="navbar-nav">
                             <div className="nav-item">
                                 {user?.authenticated ?
-                                    <button onClick={handleLogout} className="btn nav-link">Logout</button>
+                                    <button className="btn nav-link" data-bs-toggle="offcanvas" data-bs-target="#sidebar">
+                                        {user.username}
+                                    </button>
                                 :   <Link to="/login" className="nav-link">Login/Register</Link>}
                                 
                             </div>
@@ -114,7 +123,7 @@ export default function Layout(props : PropsType)
                     </div>
                 </div>
             </nav>
-            <Outlet context={[user, setUser, csrfToken]} />
+            <Outlet context={[user, setUser]} />
             <div className="p-3 bg-primary text-white">
                 <h1 className="display-6 text-center">This is the footer.</h1>
             </div>

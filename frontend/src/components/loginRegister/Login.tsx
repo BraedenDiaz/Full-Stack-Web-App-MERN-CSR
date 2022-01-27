@@ -3,7 +3,9 @@ import { useContext } from "../Layout";
 import { loginUser } from "../../api/LoginRegister";
 import FormError from "../errors/FormError";
 
-type PropsType = {};
+type PropsType = {
+    csrfToken : string
+};
 
 /**
  * @author Braeden Diaz
@@ -16,7 +18,6 @@ export default function Login(props : PropsType)
     const setUser = useContext()[1];
     const [usernameValue, setUsername] = useState("");
     const [passwordValue, setPassword] = useState("");
-    const csrfToken = useContext()[2];
 
     const [errorState, setErrorState] = useState({
         show: false,
@@ -38,7 +39,7 @@ export default function Login(props : PropsType)
     const handleSubmit = async (event : any) => {
         event.preventDefault();
 
-        const responseObj = await loginUser(usernameValue, passwordValue, csrfToken);
+        const responseObj = await loginUser(usernameValue, passwordValue, props.csrfToken);
 
         console.log("Server Response to Login:");
         console.log(responseObj);
@@ -50,11 +51,6 @@ export default function Login(props : PropsType)
                 setUser({
                     authenticated: responseObj.json.authenticated,
                     username: responseObj.json.username
-                });
-
-                setErrorState({
-                    show: false,
-                    errorsArr: []
                 });
             }
         }
@@ -75,7 +71,6 @@ export default function Login(props : PropsType)
             <FormError show={errorState.show} errorsArr={errorState.errorsArr} />
             <h1>Login</h1>
             <form onSubmit={handleSubmit}>
-                <input type="hidden" name="_csrf" value={csrfToken} />
                 <div className="mb-3 mt-3">
                     <label htmlFor="loginUsername" className="form-label">Username:</label>
                     <input type="text"
