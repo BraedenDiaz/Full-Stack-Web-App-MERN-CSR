@@ -1,20 +1,21 @@
 import { useState } from "react";
+import { useContext } from "../Layout";
+import { loginUser } from "../../api/LoginRegister";
 import FormError from "../errors/FormError";
-import { registerUser } from "../../api/LoginRegister";
 
 type PropsType = {
-    csrfToken: string,
-    setActiveTab: (arg : string) => void
+    csrfToken : string
 };
 
 /**
  * @author Braeden Diaz
  * 
- * Functional component which represents the registration form.
+ * Functional component which represents the login form.
  */
 
-export default function Register(props : PropsType)
+export default function LoginPage(props : PropsType)
 {
+    const refreshUserInfo = useContext()[1];
     const [usernameValue, setUsername] = useState("");
     const [passwordValue, setPassword] = useState("");
 
@@ -26,10 +27,10 @@ export default function Register(props : PropsType)
     const handleChange = (event : any) => {
         switch (event.target.id)
         {
-            case "registerUsername":
+            case "loginUsername":
                 setUsername(event.target.value);
                 break;
-            case "registerPassword":
+            case "loginPassword":
                 setPassword(event.target.value);
                 break;
         }
@@ -38,18 +39,17 @@ export default function Register(props : PropsType)
     const handleSubmit = async (event : any) => {
         event.preventDefault();
 
-        const responseObj = await registerUser(usernameValue, passwordValue, props.csrfToken);
-        console.log("Server Response to Register:");
+        const responseObj = await loginUser(usernameValue, passwordValue, props.csrfToken);
+
+        console.log("Server Response to Login:");
         console.log(responseObj);
 
-        if (responseObj.status === 201)
+        if (responseObj.status === 200)
         {
-            props.setActiveTab("login");
-
-            setErrorState({
-                show: false,
-                errorsArr: []
-            });
+            if (responseObj.json.authenticated)
+            {
+                refreshUserInfo();
+            }
         }
         else
         {
@@ -58,34 +58,35 @@ export default function Register(props : PropsType)
                 errorsArr: responseObj.json.errors.map((errorObj : any) => {
                     return errorObj.msg;
                 })
-            });
+            })
         }
+        
     };
 
     return (
         <div className="container mt-3 mb-3">
             <FormError show={errorState.show} errorsArr={errorState.errorsArr} />
-            <h1>Register</h1>
+            <h1>Login</h1>
             <form onSubmit={handleSubmit}>
                 <div className="mb-3 mt-3">
-                    <label htmlFor="registerUsername" className="form-label">Username:</label>
+                    <label htmlFor="loginUsername" className="form-label">Username:</label>
                     <input type="text"
-                            id="registerUsername"
-                            name="registerUsername"
+                            id="loginUsername"
+                            name="loginUsername"
                             className="form-control"
                             placeholder="Username"
                             onChange={handleChange} />
                 </div>
                 <div className="mb-3">
-                    <label htmlFor="registerPassword" className="form-label">Password:</label>
+                    <label htmlFor="loginPassword" className="form-label">Password:</label>
                     <input type="password"
-                           id="registerPassword"
-                           name="registerPassword"
-                           className="form-control"
-                           placeholder="Password"
-                           onChange={handleChange} />
+                            id="loginPassword"
+                            name="loginPassword"
+                            className="form-control"
+                            placeholder="Password"
+                            onChange={handleChange}  />
                 </div>
-                <button type="submit" className="btn btn-primary">Register</button>
+                <button type="submit" className="btn btn-primary">Login</button>
             </form>
         </div>
     );

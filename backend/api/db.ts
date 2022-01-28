@@ -30,3 +30,22 @@ export async function insertNewUser(username : string, hashedPassword : string) 
     return await newUser.save();
 }
 
+export async function updateUserProfile(username : string, newUsername : string, hashedPassword : string)
+{
+    const res = await User.updateOne({ username: username}, { username: newUsername, password: hashedPassword});
+
+    if (!res.acknowledged)
+    {
+        throw "User Profile Update Failed.";
+    }
+}
+
+export async function deleteUser(username : string)
+{
+    const res = await User.deleteOne({ username: username });
+
+    if (!(res.deletedCount === 1))
+    {
+        throw "User Delete Failed";
+    }
+}

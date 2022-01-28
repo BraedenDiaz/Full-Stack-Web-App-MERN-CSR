@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, Link, useOutletContext } from "react-router-dom";
 
-import { API_ENDPOINT } from "../api/index";
+import { API_ENDPOINT, getUser } from "../api/index";
 
 type PropsType = object;
 type User = { authenticated: boolean, username: string };
-type ContextType = [  (User | null), React.Dispatch<React.SetStateAction<User | null>>];
+type ContextType = [User, () => void];
 
 /**
  * @author Braeden Diaz
@@ -20,38 +20,25 @@ type ContextType = [  (User | null), React.Dispatch<React.SetStateAction<User | 
 
 export default function Layout(props : PropsType)
 {
-    // Top-Level state that will be shared with all child components
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User>({
+        authenticated: false,
+        username: ""
+    });
 
-    // Effect which runs only on the first render that checks with
-    // the server to see if the user is still authenticated.
-    //
-    // This is needed because this layout is re-rendered on multiple
-    // routes for the website.
-    useEffect(() => {
-        fetch(`${API_ENDPOINT}/`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include"
-        })
-        .then(responseMessage => responseMessage.json())
+    const refreshUserInfo = () => {
+        getUser()
         .then(responseJSON => {
-            console.log("Response to Layout:");
-            console.log(responseJSON);
-
-            const { authenticated, username } = responseJSON;
-
-            if (authenticated)
+            if (responseJSON.authenticated)
             {
                 setUser({
-                    authenticated: authenticated,
-                    username: username 
+                    authenticated: responseJSON.authenticated,
+                    username: responseJSON.username
                 });
             }
         });
-    }, []);
+    };
+
+    useEffect(refreshUserInfo, []);
 
     const handleLogout = () => {
         fetch(`${API_ENDPOINT}/logout`, {
@@ -68,8 +55,10 @@ export default function Layout(props : PropsType)
             }
             else
             {
-                setUser(null);
-                console.log("Logout succeeded!");
+                setUser({
+                    authenticated: false,
+                    username: ""
+                });
             }
         });
     };
@@ -81,13 +70,17 @@ export default function Layout(props : PropsType)
             </div>
             <div className="offcanvas offcanvas-end" id="sidebar">
                 <div className="offcanvas-header">
-                    <h1 className="offcanvas-title">{user?.username}</h1>
+                    <div>
+                        <h1 className="offcanvas-title">{user.username}</h1>
+                        <Link to={`/users/${user.username}`}>
+                            <button type="button" className="btn btn-primary" data-bs-dismiss="offcanvas">Profile</button>
+                        </Link>
+                    </div>
                     <button type="button" className="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
                 </div>
                 <div className="offcanvas-body">
-                    <p>Some random text.</p>
-                    <p>Some more random text.</p>
-                    <button className="btn btn-primary" type="button" data-bs-dismiss="offcanvas" onClick={handleLogout}>Logout</button>
+                    <p>Profile information.</p>
+                    <button className="btn btn-secondary" type="button" data-bs-dismiss="offcanvas" onClick={handleLogout}>Logout</button>
                 </div>
             </div>
             <nav className="navbar navbar-expand-sm bg-dark navbar-dark sticky-top">
@@ -112,7 +105,7 @@ export default function Layout(props : PropsType)
                         </ul>
                         <ul className="navbar-nav">
                             <div className="nav-item">
-                                {user?.authenticated ?
+                                {user.authenticated ?
                                     <button className="btn nav-link" data-bs-toggle="offcanvas" data-bs-target="#sidebar">
                                         {user.username}
                                     </button>
@@ -123,7 +116,7 @@ export default function Layout(props : PropsType)
                     </div>
                 </div>
             </nav>
-            <Outlet context={[user, setUser]} />
+            <Outlet context={[user, refreshUserInfo]} />
             <div className="p-3 bg-primary text-white">
                 <h1 className="display-6 text-center">This is the footer.</h1>
             </div>

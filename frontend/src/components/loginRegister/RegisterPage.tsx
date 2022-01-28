@@ -1,21 +1,20 @@
 import { useState } from "react";
-import { useContext } from "../Layout";
-import { loginUser } from "../../api/LoginRegister";
 import FormError from "../errors/FormError";
+import { registerUser } from "../../api/LoginRegister";
 
 type PropsType = {
-    csrfToken : string
+    csrfToken: string,
+    setActiveTab: (arg : string) => void
 };
 
 /**
  * @author Braeden Diaz
  * 
- * Functional component which represents the login form.
+ * Functional component which represents the registration form.
  */
 
-export default function Login(props : PropsType)
+export default function RegisterPage(props : PropsType)
 {
-    const setUser = useContext()[1];
     const [usernameValue, setUsername] = useState("");
     const [passwordValue, setPassword] = useState("");
 
@@ -27,10 +26,10 @@ export default function Login(props : PropsType)
     const handleChange = (event : any) => {
         switch (event.target.id)
         {
-            case "loginUsername":
+            case "registerUsername":
                 setUsername(event.target.value);
                 break;
-            case "loginPassword":
+            case "registerPassword":
                 setPassword(event.target.value);
                 break;
         }
@@ -39,20 +38,18 @@ export default function Login(props : PropsType)
     const handleSubmit = async (event : any) => {
         event.preventDefault();
 
-        const responseObj = await loginUser(usernameValue, passwordValue, props.csrfToken);
-
-        console.log("Server Response to Login:");
+        const responseObj = await registerUser(usernameValue, passwordValue, props.csrfToken);
+        console.log("Server Response to Register:");
         console.log(responseObj);
 
-        if (responseObj.status === 200)
+        if (responseObj.status === 201)
         {
-            if (responseObj.json.authenticated)
-            {
-                setUser({
-                    authenticated: responseObj.json.authenticated,
-                    username: responseObj.json.username
-                });
-            }
+            props.setActiveTab("login");
+
+            setErrorState({
+                show: false,
+                errorsArr: []
+            });
         }
         else
         {
@@ -61,35 +58,34 @@ export default function Login(props : PropsType)
                 errorsArr: responseObj.json.errors.map((errorObj : any) => {
                     return errorObj.msg;
                 })
-            })
+            });
         }
-        
     };
 
     return (
         <div className="container mt-3 mb-3">
             <FormError show={errorState.show} errorsArr={errorState.errorsArr} />
-            <h1>Login</h1>
+            <h1>Register</h1>
             <form onSubmit={handleSubmit}>
                 <div className="mb-3 mt-3">
-                    <label htmlFor="loginUsername" className="form-label">Username:</label>
+                    <label htmlFor="registerUsername" className="form-label">Username:</label>
                     <input type="text"
-                            id="loginUsername"
-                            name="loginUsername"
+                            id="registerUsername"
+                            name="registerUsername"
                             className="form-control"
                             placeholder="Username"
                             onChange={handleChange} />
                 </div>
                 <div className="mb-3">
-                    <label htmlFor="loginPassword" className="form-label">Password:</label>
+                    <label htmlFor="registerPassword" className="form-label">Password:</label>
                     <input type="password"
-                            id="loginPassword"
-                            name="loginPassword"
-                            className="form-control"
-                            placeholder="Password"
-                            onChange={handleChange}  />
+                           id="registerPassword"
+                           name="registerPassword"
+                           className="form-control"
+                           placeholder="Password"
+                           onChange={handleChange} />
                 </div>
-                <button type="submit" className="btn btn-primary">Login</button>
+                <button type="submit" className="btn btn-primary">Register</button>
             </form>
         </div>
     );

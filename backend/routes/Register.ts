@@ -77,7 +77,6 @@ registerRouter.post("/", csrfProtection, check("username").custom(hasNoSpaceChar
                 msg: err
             }]
         });
-        return;
     }
 });
 

@@ -2,7 +2,7 @@
 /**
  * @author Braeden Diaz
  * 
- * A simple functional component use for 404 errors.
+ * A simple functional component used for 404 errors.
  */
 
 export default function FileNotFound()
