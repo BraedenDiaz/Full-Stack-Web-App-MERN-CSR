@@ -40,10 +40,7 @@ export default function LoginPage(props : PropsType)
         event.preventDefault();
 
         const responseObj = await loginUser(usernameValue, passwordValue, props.csrfToken);
-
-        console.log("Server Response to Login:");
-        console.log(responseObj);
-
+        
         if (responseObj.status === 200)
         {
             if (responseObj.json.authenticated)

@@ -28,13 +28,10 @@ export default function Layout(props : PropsType)
     const refreshUserInfo = () => {
         getUser()
         .then(responseJSON => {
-            if (responseJSON.authenticated)
-            {
-                setUser({
-                    authenticated: responseJSON.authenticated,
-                    username: responseJSON.username
-                });
-            }
+            setUser({
+                authenticated: responseJSON.authenticated,
+                username: responseJSON.username
+            });
         });
     };
 
