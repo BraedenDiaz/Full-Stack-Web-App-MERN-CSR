@@ -91,7 +91,7 @@ export default function Layout(props : PropsType)
                                 <Link to="/" className="nav-link">Home</Link>
                             </li>
                             <li className="nav-item">
-                                <Link to="#" className="nav-link">Forums</Link>
+                                <Link to="/forums" className="nav-link">Forums</Link>
                             </li>
                             <li className="nav-item">
                                 <Link to="#" className="nav-link">About</Link>

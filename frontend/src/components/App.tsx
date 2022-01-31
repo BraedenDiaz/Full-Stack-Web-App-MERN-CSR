@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import FileNotFound from "./errors/404";
+import CreateNewForum from "./forums/CreateNewForum";
+import ForumsPage from "./forums/ForumsPage";
 import Home from "./Home";
 import Layout from "./Layout";
 import LoginRegisterContainer from "./loginRegister/index";
@@ -21,6 +23,8 @@ function App() {
           <Route index element={<Home />} />
           <Route path="login" element={<LoginRegisterContainer />} />
           <Route path="users/:username" element={<UserAccountPage />} />
+          <Route path="forums" element={<ForumsPage />} />
+          <Route path="forums/create" element={<CreateNewForum />} />
           <Route path="*" element={<FileNotFound />} />
         </Route>
       </Routes>
