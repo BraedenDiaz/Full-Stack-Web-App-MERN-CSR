@@ -22,6 +22,7 @@ import { WEB_SERVER_PORT,
         SESSION_COOKIE_PATH,
         SESSION_COOKIE_HTTP_ONLY} from "./config/config";
 import usersRouter from "./routes/Users";
+import forumsRouter from "./routes/Forums";
 
 
 declare module "express-session" {
@@ -99,6 +100,7 @@ app.use("/register" , registerRouter);
 app.use("/login", loginRouter);
 app.use("/logout", logoutRouter);
 app.use("/users", usersRouter);
+app.use("/forums", forumsRouter);
 
 app.use((err : any, req : express.Request, res : express.Response, next : express.NextFunction) => {
     if (err.code === "EBADCSRFTOKEN")

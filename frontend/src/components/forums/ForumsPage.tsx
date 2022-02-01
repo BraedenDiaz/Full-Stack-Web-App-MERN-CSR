@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { getUser } from "../../api";
+import { getForums } from "../../api/Forums";
 
 /**
  * @author Braeden Diaz
@@ -12,9 +14,14 @@ import { Navigate } from "react-router-dom";
 
 export default function ForumsPage()
 {
+    const [user, setUser] = useState({
+        authenticated: false,
+        username: ""
+    });
+
     const [forums, setForums] = useState([
         {
-            id: -1,
+            _id: -1,
             title: "",
             category: "",
             description: ""
@@ -22,53 +29,17 @@ export default function ForumsPage()
     ]);
     let [createNewForumBtnClicked, setCreateNewForumBtnClicked] = useState(false);
 
-    // Setup temporary example forums
     useEffect(() => {
-        setForums([
-            {
-                id : 1,
-                title: "Forum 1",
-                category: "category1",
-                description: "Forum 1 description."
-            },
-            {
-                id : 2,
-                title: "Forum 2",
-                category: "category2",
-                description: "Forum 2 description."
-            },
-            {
-                id : 3,
-                title: "Forum 3",
-                category: "category2",
-                description: "Forum 3 description."
-            },
-            {
-                id : 4,
-                title: "Forum 4",
-                category: "category4",
-                description: "Forum 4 description."
-            },
-            {
-                id : 5,
-                title: "Forum 5",
-                category: "category1",
-                description: "Forum 5 description."
-            },
-            {
-                id : 6,
-                title: "Forum 6",
-                category: "category3",
-                description: "Forum 6 description."
-            },
-            {
-                id : 7,
-                title: "Forum 7",
-                category: "category2",
-                description: "Forum 7 description."
-            }
-        ]);
-    }, []);
+        getUser()
+        .then(responseJSON => {
+            setUser(responseJSON);
+        });
+
+        getForums()
+        .then(responseJSON => {
+            setForums(responseJSON);
+        });
+    },  []);
 
     const handleCreateNewForumBtnClick = () => {
         setCreateNewForumBtnClicked(true);
@@ -87,13 +58,13 @@ export default function ForumsPage()
     {
         forumCards.push(
             (
-                <div key={"card_" + forumObj.id}>
+                <div key={"card_" + forumObj._id}>
                     <div className="card border-secondary text-center">
                         <div className="card-header bg-primary text-white">
                             <h5>{forumObj.title}</h5>
                         </div>
                         <div className="card-body">
-                            <h4 className="card-title">{forumObj.id}</h4>
+                            <h4 className="card-title">{forumObj._id}</h4>
                             <p className="card-text">{forumObj.description}</p>
                         </div>
                         <ul className="list-group list-group-flush">
@@ -131,7 +102,8 @@ export default function ForumsPage()
         <div className="container mt-4 mb-4">
             <div className="clearfix mb-4">
                 <span className="h1">Forums</span>
-                <button type="button" className="btn btn-success float-end" onClick={handleCreateNewForumBtnClick}>Create New Forum</button>
+                { user.authenticated ? <button type="button" className="btn btn-success float-end" onClick={handleCreateNewForumBtnClick}>Create New Forum</button>
+                : []}
             </div>
             
             <div className="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">

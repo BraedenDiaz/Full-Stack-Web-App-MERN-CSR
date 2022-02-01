@@ -19,6 +19,7 @@ const isAuthenticated = (req : express.Request, res : express.Response, next : e
     }
 };
 
+// Never return all users
 usersRouter.get("/", (req, res, next) => {
     res.status(403).json({
         authenticated: false

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { insertNewForum } from "../../api/Forums";
 import FormError from "../errors/FormError";
 
 /**
@@ -37,11 +38,14 @@ export default function CreateNewForum()
     const handleFormSubmit = (event : any) => {
         event.preventDefault();
 
-        console.log("Entered Form:");
-        console.log(`Title: ${forumTitle}`);
-        console.log(`Category: ${forumCategory}`);
-        console.log(`Description: ${forumDescription}`);
-
+        insertNewForum(forumTitle, forumCategory, forumDescription)
+        .then(responseStatus => {
+            if (Number(responseStatus) !== 200)
+            {
+                console.log("Insert new forum response status not 200.");
+            }
+            console.log(`Insert New Forum Response Status: ${responseStatus}`);
+        });
     };
 
     return (
