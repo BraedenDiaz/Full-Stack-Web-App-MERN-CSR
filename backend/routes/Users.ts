@@ -2,22 +2,9 @@ import express from "express";
 import { check, validationResult } from "express-validator";
 import { deleteUser, updateUserProfile } from "../api/db";
 import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "../config/config";
-import { hashAndSaltPassword, hasNoSpaceCharacters } from "../helpers/authentication";
+import { hashAndSaltPassword, hasNoSpaceCharacters, isAuthenticated, isAuthorized } from "../helpers/authentication";
 
 const usersRouter = express.Router();
-
-const isAuthenticated = (req : express.Request, res : express.Response, next : express.NextFunction) => {
-    if (req.session.user && req.session.authenticated)
-    {
-        next();
-    }
-    else
-    {
-        res.status(403).json({
-            authenticated: false
-        });
-    }
-};
 
 // Never return all users
 usersRouter.get("/", (req, res, next) => {
@@ -29,7 +16,7 @@ usersRouter.get("/", (req, res, next) => {
 usersRouter.get("/:username", isAuthenticated, (req, res, next) => {
     const username = req.params.username;
 
-    if (req.session.user!.username === username)
+    if (isAuthorized(username, req, res, next))
     {
         res.status(200).json({
             authenticated: req.session.authenticated,
@@ -70,36 +57,45 @@ usersRouter.put("/:username", isAuthenticated, check("newUsername").custom(hasNo
     }
 
     const username = req.params.username;
-    const { newUsername, newPassword } = req.body;
-    const hashedPassword : string | null = await hashAndSaltPassword(newPassword);
 
-    // If the hash and salting of the password failed, return an internal server error response
-    if (hashedPassword === null)
+    if (isAuthorized(username, req, res, next))
     {
-        res.status(500).send();
-        return;
+        const { newUsername, newPassword } = req.body;
+        const hashedPassword : string | null = await hashAndSaltPassword(newPassword);
+    
+        // If the hash and salting of the password failed, return an internal server error response
+        if (hashedPassword === null)
+        {
+            res.status(500).send();
+            return;
+        }
+    
+        try
+        {
+            await updateUserProfile(username, newUsername, hashedPassword);
+            res.status(200).json({});
+        }
+        catch (err : any)
+        {
+            res.status(400).json({
+                errors: [{
+                    msg: err
+                }]
+            });
+        }
     }
-
-    try
+    else
     {
-        await updateUserProfile(username, newUsername, hashedPassword);
-        res.status(200).json({});
-    }
-    catch (err : any)
-    {
-        res.status(400).json({
-            errors: [{
-                msg: err
-            }]
+        res.status(403).json({
+            authenticated: false
         });
     }
-
 });
 
 usersRouter.delete("/:username", isAuthenticated, async (req, res, next) => {
     const username = req.params.username;
 
-    if (req.session.user!.username === username)
+    if (isAuthorized(username, req, res, next))
     {
         try
         {

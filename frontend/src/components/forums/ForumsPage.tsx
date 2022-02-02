@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getUser } from "../../api";
-import { getCategories, getForums } from "../../api/Forums";
+import { deleteForum, getCategories, getForums } from "../../api/Forums";
 
 /**
  * @author Braeden Diaz
@@ -14,6 +14,7 @@ import { getCategories, getForums } from "../../api/Forums";
 
 export default function ForumsPage()
 {
+    const [refresh, setRefresh] = useState(false);
     const [user, setUser] = useState({
         authenticated: false,
         username: ""
@@ -23,7 +24,11 @@ export default function ForumsPage()
 
     const [forums, setForums] = useState([
         {
-            _id: -1,
+            _id: "",
+            author: {
+                _id: "",
+                username: ""
+            },
             title: "",
             category: "",
             description: ""
@@ -46,10 +51,26 @@ export default function ForumsPage()
         .then(responseJSON => {
             setForums(responseJSON);
         });
-    },  []);
+    },  [refresh]);
 
     const handleCreateNewForumBtnClick = () => {
         setCreateNewForumBtnClicked(true);
+    };
+
+    const handleDeleteForum = async (event : any) => {
+        const deleteForumBtnID : string = event.target.id;
+        const forumID : string = deleteForumBtnID.substring(deleteForumBtnID.lastIndexOf("_") + 1);
+
+        const responseObj = await deleteForum(forumID);
+
+        if (responseObj.status !== 200)
+        {
+            console.log("Delete Forum Error: Response not status 200.");
+        }
+        else
+        {
+            setRefresh(true);
+        }
     };
 
     if (createNewForumBtnClicked)
@@ -68,30 +89,67 @@ export default function ForumsPage()
         // Get the corresponding category color from the color map
         const categoryColor = categoryColorMap[convertedCategory];
 
-        console.log();
+        let userIsForumAuthor = false;
+
+        if (user.authenticated && user.username === forumObj.author.username)
+        {
+            userIsForumAuthor = true;
+        }
 
         forumCards.push(
             (
                 <div key={"card_" + forumObj._id}>
-                    <div className="card border-secondary text-center">
-                        <div className="card-header p-3 text-white" style={{backgroundColor: categoryColor}}>
-                        </div>
-                        <div className="card-body">
-                            <h4 className="card-title">{forumObj.title}</h4>
-                            <p className="card-text">{forumObj.description}</p>
-                        </div>
-                        <ul className="list-group list-group-flush">
-                            <li className="list-group-item">An item</li>
-                            <li className="list-group-item">Category: {forumObj.category}</li>
-                            <li className="list-group-item">A third item</li>
-                        </ul>
-                        <div className="card-footer" style={{backgroundColor: categoryColor}}>
-                            {forumObj._id}
+                    <div>
+                        <div className="card border-secondary text-center">
+                            <div className="card-header p-3 text-white" style={{backgroundColor: categoryColor}}>
+                                {
+                                    userIsForumAuthor ?
+                                        "You Are the Author of this Forum"
+                                    :
+                                        ""
+                                }
+                            </div>
+                            <div className="card-body">
+                                <h4 className="card-title">{forumObj.title}</h4>
+                                <p className="card-text">{forumObj.description}</p>
+                            </div>
+                            <ul className="list-group list-group-flush">
+                                <li className="list-group-item">Author: {forumObj.author.username}</li>
+                                <li className="list-group-item">Category: {forumObj.category}</li>
+                                {
+                                    userIsForumAuthor ?
+                                    <li className="list-group-item">
+                                        <button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteForumConfirmationModal">Delete Forum</button>
+                                    </li>
+                                    :
+                                        []
+                                }
+                            </ul>
+                            <div className="card-footer" style={{backgroundColor: categoryColor}}>
+                                {forumObj._id}
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <div id="deleteForumConfirmationModal" className="modal fade">
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h4 className="modal-title">Delete Forum</h4>
+                                    <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div className="modal-body">
+                                    <p>Are you sure you want to delete this forum? Once you do, there's no going back.</p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button id={"deleteForumBtn_" + forumObj._id} type="button" className="btn btn-danger" onClick={handleDeleteForum} data-bs-dismiss="modal">Delete Forum</button>
+                                    <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>    
             )
-        )
+        );
     }
 
     //const forumRowCols = [];

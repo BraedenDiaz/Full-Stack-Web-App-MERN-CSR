@@ -1,4 +1,4 @@
-import User from "../models/Users";
+import User, {UserInterface} from "../models/Users";
 import Forum from "../models/Forums";
 
 /**
@@ -56,9 +56,17 @@ export async function deleteUser(username : string)
 
 ////// CRUD Operations for Forums //////
 
-export async function insertNewForum(forumTitle : string, forumCategory : string, forumDescription : string)
+export async function insertNewForum(authorUsername : string, forumTitle : string, forumCategory : string, forumDescription : string)
 {
+    const user : (any | null) = await getUser(authorUsername);
+
+    if (user === null)
+    {
+        throw "Insert New Forum Error: Author username does not exist.";
+    }
+
     const newForum = new Forum({
+        author: user._id,
         title: forumTitle,
         category: forumCategory,
         description: forumDescription
@@ -70,9 +78,15 @@ export async function insertNewForum(forumTitle : string, forumCategory : string
 export async function getForums()
 {
     // Retrieves all forums from the database
-    const forums = await Forum.find({});
+    const forums = await Forum.find({}).populate("author", "username");
 
     return forums;
+}
+
+export async function getForumAuthor(forumID : string)
+{
+    const forum = await Forum.findById(forumID).populate<{author: UserInterface}>("author", "username");
+    return forum.author.username;
 }
 
 export async function updateForum(forumID : string, newTitle : string, newCategory : string, newDescription : string)

@@ -1,5 +1,6 @@
 import express from "express";
-import { getForums, insertNewForum } from "../api/db";
+import { deleteForum, getForumAuthor, getForums, insertNewForum } from "../api/db";
+import { isAuthenticated, isAuthorized } from "../helpers/authentication";
 
 // Assign colors to a corresponding hex code to be used
 // for forum categories.
@@ -49,12 +50,12 @@ forumsRouter.get("/categories", (req, res, next) => {
     res.status(200).json(Object.entries(Category));
 });
 
-forumsRouter.post("/create", async (req, res, next) => {
+forumsRouter.post("/create", isAuthenticated, async (req, res, next) => {
     const { forumTitle, forumCategory, forumDescription } = req.body;
 
     try
     {
-        await insertNewForum(forumTitle, forumCategory, forumDescription);
+        await insertNewForum(req.session.user!.username, forumTitle, forumCategory, forumDescription);
         res.status(200).json({});
     }
     catch (err : any)
@@ -63,6 +64,24 @@ forumsRouter.post("/create", async (req, res, next) => {
             errors: [{
                 msg: err
             }]
+        });
+    }
+});
+
+forumsRouter.delete("/:forumID/delete", isAuthenticated, async (req, res, next) => {
+    const forumID : string = req.params.forumID;
+    const forumAuthor : string = await getForumAuthor(forumID);
+    
+    if (isAuthorized(forumAuthor, req, res, next))
+    {
+        const result = await deleteForum(forumID);
+        console.log(result);
+        res.status(200).json({});
+    }
+    else
+    {
+        res.status(403).json({
+            authenticated: false
         });
     }
 });

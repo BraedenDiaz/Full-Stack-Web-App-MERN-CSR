@@ -1,3 +1,4 @@
+import express from "express";
 import bcrypt from "bcrypt";
 import { CustomValidator } from "express-validator";
 import { SALT_ROUNDS } from "../config/config";
@@ -5,6 +6,8 @@ import { SALT_ROUNDS } from "../config/config";
 /**
  * @author Braeden Diaz
  */
+
+////// Password Hashing and Salting, and Authentication //////
 
 export async function hashAndSaltPassword(password : string) : Promise<string | null>
 {
@@ -36,6 +39,32 @@ export async function authenticatePassword(password : string, hash : string) : P
 
     return false;
 }
+
+////// Custom Authentication Express Middleware //////
+
+export const isAuthenticated = (req : express.Request, res : express.Response, next : express.NextFunction) => {
+    if (req.session.user && req.session.authenticated)
+    {
+        next();
+    }
+    else
+    {
+        res.status(403).json({
+            authenticated: false
+        });
+    }
+};
+
+export const isAuthorized = (authorizedUser : string, req : express.Request, res : express.Response, next : express.NextFunction) => {
+    if (req.session.user && req.session.user.username === authorizedUser)
+    {
+        return true;
+    }
+
+    return false;
+};
+
+////// Custom Validators for use with express-validator //////
 
 export const hasNoSpaceCharacters : CustomValidator = (value) => {
     if (/\s/.test(value))
