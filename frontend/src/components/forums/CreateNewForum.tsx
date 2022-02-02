@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { insertNewForum } from "../../api/Forums";
+import { useEffect, useState } from "react";
+import { getCategories, insertNewForum } from "../../api/Forums";
 import FormError from "../errors/FormError";
 
 /**
@@ -15,10 +15,25 @@ export default function CreateNewForum()
     const [forumTitle, setForumTitle] = useState("");
     const [forumCategory, setForumCategory] = useState("");
     const [forumDescription, setForumDescription] = useState("");
+    const [categories, setCategories] = useState([""]);
     const [errorState, setErrorState] = useState({
         show: false,
         errorsArr: []
     });
+
+    useEffect(() => {
+        getCategories()
+        .then(responseJSON => {
+            // We get back an array of key-value pair arrays where the key is the category
+            // name and the value is the category color. On this page, we only want the name,
+            // so we convert them into their own array and set our component's state.
+            //
+            // It's also good to note that we use an Object instead of a Map since the keys for
+            // an object can only have a string type whereas the keys for a Map can have any type.
+            const categoryNames : string[] = Object.keys(Object.fromEntries(responseJSON));
+            setCategories(categoryNames);
+        });
+    }, []);
 
     const handleChange = (event : any) => {
         switch (event.target.name)
@@ -71,12 +86,7 @@ export default function CreateNewForum()
                             defaultValue={forumCategory}
                             onChange={handleChange}>
                         <option value="" disabled>Select a forum category...</option>
-                        <option value="Category1">Category 1</option>
-                        <option value="Category2">Category 2</option>
-                        <option value="Category3">Category 3</option>
-                        <option value="Category4">Category 4</option>
-                        <option value="Category5">Category 5</option>
-                        <option value="Category6">Category 6</option>
+                        {categories.map(category => <option key={"category_" + category} value={category}>{category}</option>)}
                     </select>
                 </div>
                 <div className="mb-3 mt-3">

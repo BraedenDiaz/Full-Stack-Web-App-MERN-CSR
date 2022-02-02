@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getUser } from "../../api";
-import { getForums } from "../../api/Forums";
+import { getCategories, getForums } from "../../api/Forums";
 
 /**
  * @author Braeden Diaz
@@ -19,6 +19,8 @@ export default function ForumsPage()
         username: ""
     });
 
+    const [categoryColorMap, setCategoryColorMap] = useState(Object);
+
     const [forums, setForums] = useState([
         {
             _id: -1,
@@ -33,6 +35,11 @@ export default function ForumsPage()
         getUser()
         .then(responseJSON => {
             setUser(responseJSON);
+        });
+
+        getCategories()
+        .then(responseJSON => {
+            setCategoryColorMap(Object.fromEntries(responseJSON));
         });
 
         getForums()
@@ -53,27 +60,33 @@ export default function ForumsPage()
 
     const forumCards = [];
     
-    // Build the JSX HTML for our forums cards
+    // Build the JSX HTML forum card for each forum
     for (let forumObj of forums)
     {
+        // Remove spaces from the category name
+        const convertedCategory = forumObj.category.replace(/\s/g, "");
+        // Get the corresponding category color from the color map
+        const categoryColor = categoryColorMap[convertedCategory];
+
+        console.log();
+
         forumCards.push(
             (
                 <div key={"card_" + forumObj._id}>
                     <div className="card border-secondary text-center">
-                        <div className="card-header bg-primary text-white">
-                            <h5>{forumObj.title}</h5>
+                        <div className="card-header p-3 text-white" style={{backgroundColor: categoryColor}}>
                         </div>
                         <div className="card-body">
-                            <h4 className="card-title">{forumObj._id}</h4>
+                            <h4 className="card-title">{forumObj.title}</h4>
                             <p className="card-text">{forumObj.description}</p>
                         </div>
                         <ul className="list-group list-group-flush">
                             <li className="list-group-item">An item</li>
-                            <li className="list-group-item">A second</li>
+                            <li className="list-group-item">Category: {forumObj.category}</li>
                             <li className="list-group-item">A third item</li>
                         </ul>
-                        <div className="card-footer bg-primary text-white">
-                            Footer
+                        <div className="card-footer" style={{backgroundColor: categoryColor}}>
+                            {forumObj._id}
                         </div>
                     </div>
                 </div>

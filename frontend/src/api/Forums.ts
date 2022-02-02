@@ -30,3 +30,17 @@ export const getForums = async () => {
 
     return responseJSON;
 };
+
+export const getCategories = async () => {
+    const response = await fetch(`${API_ENDPOINT}/forums/categories`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: "include"
+    });
+
+    const responseJSON = await response.json();
+
+    return responseJSON;
+};
