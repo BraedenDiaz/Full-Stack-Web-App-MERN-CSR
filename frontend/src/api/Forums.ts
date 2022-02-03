@@ -1,10 +1,25 @@
 import { API_ENDPOINT } from ".";
 
-export const insertNewForum = async (forumTitle : string, forumCategory : string, forumDescription : string) => {
+export const getCSRFToken = async () => {
+    const response = await fetch(`${API_ENDPOINT}/forums/create`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: "include"
+    });
+
+    const responseJSON = await response.json();
+
+    return responseJSON;
+};
+
+export const insertNewForum = async (forumTitle : string, forumCategory : string, forumDescription : string, csrfToken : any) => {
     const response = await fetch(`${API_ENDPOINT}/forums/create`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "XSRF-TOKEN": csrfToken
         },
         credentials: "include",
         body: JSON.stringify({
@@ -14,7 +29,13 @@ export const insertNewForum = async (forumTitle : string, forumCategory : string
         })
     });
 
-    return response.status;
+    const responseJSON = await response.json();
+    const responseObj = {
+        status: response.status,
+        json: responseJSON
+    };
+
+    return responseObj;
 };
 
 export const getForums = async () => {

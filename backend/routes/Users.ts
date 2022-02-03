@@ -1,3 +1,4 @@
+import csurf from "csurf";
 import express from "express";
 import { check, validationResult } from "express-validator";
 import { deleteUser, updateUserProfile } from "../api/db";
@@ -6,6 +7,8 @@ import { hashAndSaltPassword, hasNoSpaceCharacters, isAuthenticated, isAuthorize
 
 const usersRouter = express.Router();
 
+const csrfProtection = csurf();
+
 // Never return all users
 usersRouter.get("/", (req, res, next) => {
     res.status(403).json({
@@ -13,15 +16,16 @@ usersRouter.get("/", (req, res, next) => {
     });
 });
 
-usersRouter.get("/:username", isAuthenticated, (req, res, next) => {
-    const username = req.params.username;
+usersRouter.get("/:username", csrfProtection, isAuthenticated, (req, res, next) => {
+    const username = req.params.username;;
 
     if (isAuthorized(username, req, res, next))
     {
         res.status(200).json({
             authenticated: req.session.authenticated,
             username: req.session.user?.username,
-            password: req.session.user?.password
+            password: req.session.user?.password,
+            csrfToken: req.csrfToken()
         });
     }
     else
@@ -32,7 +36,7 @@ usersRouter.get("/:username", isAuthenticated, (req, res, next) => {
     }
 });
 
-usersRouter.put("/:username", isAuthenticated, check("newUsername").custom(hasNoSpaceCharacters)
+usersRouter.put("/:username", csrfProtection, isAuthenticated, check("newUsername").custom(hasNoSpaceCharacters)
                                                  .isAscii()
                                                  .withMessage("Username must use ASCII characters only.")
                                                  .stripLow()

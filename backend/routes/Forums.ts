@@ -1,6 +1,8 @@
 import express from "express";
 import { deleteForum, getForumAuthor, getForums, insertNewForum } from "../api/db";
 import { isAuthenticated, isAuthorized } from "../helpers/authentication";
+import { check, validationResult } from "express-validator";
+import csurf from "csurf";
 
 // Assign colors to a corresponding hex code to be used
 // for forum categories.
@@ -34,6 +36,8 @@ enum Category
 
 const forumsRouter = express.Router();
 
+const csrfProtection = csurf();
+
 forumsRouter.get("/", async (req, res, next) => {
     const forumsResult = await getForums();
 
@@ -50,7 +54,37 @@ forumsRouter.get("/categories", (req, res, next) => {
     res.status(200).json(Object.entries(Category));
 });
 
-forumsRouter.post("/create", isAuthenticated, async (req, res, next) => {
+forumsRouter.get("/create", csrfProtection, (req, res, next) => {
+    res.status(200).json({
+        csrfToken: req.csrfToken()
+    });
+});
+
+forumsRouter.post("/create", csrfProtection, isAuthenticated, check("forumTitle")
+                                                .isAscii()
+                                                .withMessage("The forum title must use ASCII characters only.")
+                                                .stripLow()
+                                                .escape(),
+                                              check("forumCategory")
+                                                .isAscii()
+                                                .withMessage("Category must use ASCII characters only.")
+                                                .stripLow()
+                                                .escape(),
+                                              check("forumDescription")
+                                                .isAscii()
+                                                .withMessage("The forum description must use ASCII characters only.")
+                                                .stripLow()
+                                                .escape(),
+                                                async (req, res, next) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+    {
+        return res.status(400).json({
+            errors: errors.array()
+        });
+    }
+
     const { forumTitle, forumCategory, forumDescription } = req.body;
 
     try
@@ -74,8 +108,7 @@ forumsRouter.delete("/:forumID/delete", isAuthenticated, async (req, res, next) 
     
     if (isAuthorized(forumAuthor, req, res, next))
     {
-        const result = await deleteForum(forumID);
-        console.log(result);
+        await deleteForum(forumID);
         res.status(200).json({});
     }
     else

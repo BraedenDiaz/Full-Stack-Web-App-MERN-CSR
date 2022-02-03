@@ -8,6 +8,7 @@ export const getUserProfile = async (username : string) => {
         },
         credentials: "include"
     });
+    
     const responseJSON = await response.json();
 
     return {
@@ -16,11 +17,12 @@ export const getUserProfile = async (username : string) => {
     };
 };
 
-export const saveUserProfile = async (username : string, newUsername : string, newPassword : string) => {
+export const saveUserProfile = async (username : string, newUsername : string, newPassword : string, csrfToken : any) => {
     const response = await fetch(`${API_ENDPOINT}/users/${username}`, {
         method: "PUT",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "XSRF-TOKEN": csrfToken
         },
         credentials: "include",
         body: JSON.stringify({

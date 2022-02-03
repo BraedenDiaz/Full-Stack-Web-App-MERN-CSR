@@ -39,8 +39,6 @@ export default function RegisterPage(props : PropsType)
         event.preventDefault();
 
         const responseObj = await registerUser(usernameValue, passwordValue, props.csrfToken);
-        console.log("Server Response to Register:");
-        console.log(responseObj);
 
         if (responseObj.status === 201)
         {

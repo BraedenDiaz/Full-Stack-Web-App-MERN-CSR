@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { deleteUserAccount } from "../../api/Users";
 import FormError from "../errors/FormError";
 import { useContext } from "../Layout";
 
 export default function AccountPage()
 {
+    const navigate = useNavigate();
     const { username } = useParams();
     const refreshUserInfo = useContext()[1];
-    const [redirect, setRedirect] = useState(false);
     const [errorState, setErrorState] = useState({
         show: false,
         errorsArr: []
@@ -20,7 +20,7 @@ export default function AccountPage()
         if (responseObj.status === 200)
         {
             refreshUserInfo();
-            setRedirect(true);
+            navigate("/");
         }
         else
         {
@@ -32,11 +32,6 @@ export default function AccountPage()
             });
         }
     };
-    
-    if (redirect)
-    {
-        return <Navigate to="/" />;
-    }
 
     return (
         <div className="container mt-3 mb-3">

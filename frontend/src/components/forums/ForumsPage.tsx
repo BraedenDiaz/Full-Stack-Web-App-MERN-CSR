@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useLocation } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { getUser } from "../../api";
 import { deleteForum, getCategories, getForums } from "../../api/Forums";
 
@@ -12,8 +13,18 @@ import { deleteForum, getCategories, getForums } from "../../api/Forums";
  * 
  */
 
-export default function ForumsPage()
+type PropsType = {
+    alert: {
+        show: boolean,
+        type : string,
+        message: string
+    },
+    setAlert : Dispatch<SetStateAction<{ show: boolean; type: string; message: string; }>>
+};
+
+export default function ForumsPage(props : PropsType)
 {
+    const navigate = useNavigate();
     const [refresh, setRefresh] = useState(false);
     const [user, setUser] = useState({
         authenticated: false,
@@ -34,7 +45,6 @@ export default function ForumsPage()
             description: ""
         }
     ]);
-    let [createNewForumBtnClicked, setCreateNewForumBtnClicked] = useState(false);
 
     useEffect(() => {
         getUser()
@@ -54,7 +64,7 @@ export default function ForumsPage()
     },  [refresh]);
 
     const handleCreateNewForumBtnClick = () => {
-        setCreateNewForumBtnClicked(true);
+        navigate("/forums/create");
     };
 
     const handleDeleteForum = async (event : any) => {
@@ -69,15 +79,22 @@ export default function ForumsPage()
         }
         else
         {
+            props.setAlert({
+                show: true,
+                type: "success",
+                message: "Forum Deleted Successfully!"
+            });
             setRefresh(true);
         }
     };
 
-    if (createNewForumBtnClicked)
-    {
-        
-        return <Navigate to="/forums/create" />;
-    }
+    const handleAlertClose = () => {
+        props.setAlert({
+            show: false,
+            type: "success",
+            message: ""
+        });
+    };
 
     const forumCards = [];
     
@@ -119,7 +136,7 @@ export default function ForumsPage()
                                 {
                                     userIsForumAuthor ?
                                     <li className="list-group-item">
-                                        <button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteForumConfirmationModal">Delete Forum</button>
+                                        <button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target={"#deleteForumConfirmationModal_" + forumObj._id}>Delete Forum</button>
                                     </li>
                                     :
                                         []
@@ -130,7 +147,7 @@ export default function ForumsPage()
                             </div>
                         </div>
                     </div>
-                    <div id="deleteForumConfirmationModal" className="modal fade">
+                    <div id={"deleteForumConfirmationModal_" + forumObj._id} className="modal fade">
                         <div className="modal-dialog modal-dialog-centered">
                             <div className="modal-content">
                                 <div className="modal-header">
@@ -171,6 +188,19 @@ export default function ForumsPage()
 
     return (
         <div className="container mt-4 mb-4">
+            {
+                props.alert.show ?
+                    <div className={`alert alert-${props.alert.type} alert-dismissible fade show`}>
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" onClick={handleAlertClose}></button>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Warning:">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>
+                        {props.alert.message}
+                    </div>
+                :
+                    []
+                
+            }
             <div className="clearfix mb-4">
                 <span className="h1">Forums</span>
                 { user.authenticated ? <button type="button" className="btn btn-success float-end" onClick={handleCreateNewForumBtnClick}>Create New Forum</button>

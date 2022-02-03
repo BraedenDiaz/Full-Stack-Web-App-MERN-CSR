@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { getCategories, insertNewForum } from "../../api/Forums";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCategories, getCSRFToken, insertNewForum } from "../../api/Forums";
 import FormError from "../errors/FormError";
 
 /**
@@ -10,8 +11,19 @@ import FormError from "../errors/FormError";
  * 
  */
 
-export default function CreateNewForum()
+ type PropsType = {
+    alert: {
+        show: boolean,
+        type : string,
+        message: string
+    },
+    setAlert : Dispatch<SetStateAction<{ show: boolean; type: string; message: string; }>>
+};
+
+export default function CreateNewForum(props : PropsType)
 {
+    const navigate = useNavigate();
+    const [csrfToken, setCSRFToken] = useState("");
     const [forumTitle, setForumTitle] = useState("");
     const [forumCategory, setForumCategory] = useState("");
     const [forumDescription, setForumDescription] = useState("");
@@ -22,6 +34,11 @@ export default function CreateNewForum()
     });
 
     useEffect(() => {
+        getCSRFToken()
+        .then(responseJSON => {
+            setCSRFToken(responseJSON.csrfToken)
+        });
+
         getCategories()
         .then(responseJSON => {
             // We get back an array of key-value pair arrays where the key is the category
@@ -53,13 +70,28 @@ export default function CreateNewForum()
     const handleFormSubmit = (event : any) => {
         event.preventDefault();
 
-        insertNewForum(forumTitle, forumCategory, forumDescription)
-        .then(responseStatus => {
-            if (Number(responseStatus) !== 200)
+        
+
+        insertNewForum(forumTitle, forumCategory, forumDescription, csrfToken)
+        .then(responseObj => {
+            if (responseObj.status === 400)
             {
-                console.log("Insert new forum response status not 200.");
+                setErrorState({
+                    show: true,
+                    errorsArr: responseObj.json.errors.map((errorObj : any) => {
+                        return errorObj.msg;
+                    })
+                });
             }
-            console.log(`Insert New Forum Response Status: ${responseStatus}`);
+            else
+            {
+                props.setAlert({
+                    show: true,
+                    type: "success",
+                    message: "Forum Created Successfully!"
+                });
+                navigate("/forums");
+            }
         });
     };
 
