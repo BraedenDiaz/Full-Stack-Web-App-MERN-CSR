@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { useLocation } from "react-router";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../../api";
 import { deleteForum, getCategories, getForums } from "../../api/Forums";
@@ -22,7 +21,7 @@ type PropsType = {
     setAlert : Dispatch<SetStateAction<{ show: boolean; type: string; message: string; }>>
 };
 
-export default function ForumsPage(props : PropsType)
+export default function ForumListingsPage(props : PropsType)
 {
     const navigate = useNavigate();
     const [refresh, setRefresh] = useState(false);
@@ -96,6 +95,12 @@ export default function ForumsPage(props : PropsType)
         });
     };
 
+    const handleEnterForum = (event : any) => {
+        const enterForumBtnID : string = event.target.id;
+        const forumID : string = enterForumBtnID.substring(enterForumBtnID.lastIndexOf("_") + 1);
+        navigate(`/forums/${forumID}`);
+    };
+
     const forumCards = [];
     
     // Build the JSX HTML forum card for each forum
@@ -116,35 +121,36 @@ export default function ForumsPage(props : PropsType)
         forumCards.push(
             (
                 <div key={"card_" + forumObj._id}>
-                    <div>
-                        <div className="card border-secondary text-center">
-                            <div className="card-header p-3 text-white" style={{backgroundColor: categoryColor}}>
+                    <div className="card border-secondary text-center">
+                        <div className="card-header p-3 text-white" style={{backgroundColor: categoryColor}}>
+                            {
+                                userIsForumAuthor ?
+                                    "You Are the Author of this Forum"
+                                :
+                                    ""
+                            }
+                        </div>
+                        <div className="card-body">
+                            <h4 className="card-title">{forumObj.title}</h4>
+                            <p className="card-text">{forumObj.description}</p>
+                        </div>
+                        <ul className="list-group list-group-flush">
+                            <li className="list-group-item">Author: {forumObj.author.username}</li>
+                            <li className="list-group-item">Category: {forumObj.category}</li>
+                            <li className="list-group-item">
+                                <button id={`enterForumBtn_${forumObj._id}`} type="button" className="btn btn-info text-white me-2" onClick={handleEnterForum}>Enter Forum</button>
                                 {
                                     userIsForumAuthor ?
-                                        "You Are the Author of this Forum"
-                                    :
-                                        ""
-                                }
-                            </div>
-                            <div className="card-body">
-                                <h4 className="card-title">{forumObj.title}</h4>
-                                <p className="card-text">{forumObj.description}</p>
-                            </div>
-                            <ul className="list-group list-group-flush">
-                                <li className="list-group-item">Author: {forumObj.author.username}</li>
-                                <li className="list-group-item">Category: {forumObj.category}</li>
-                                {
-                                    userIsForumAuthor ?
-                                    <li className="list-group-item">
+                                    
                                         <button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target={"#deleteForumConfirmationModal_" + forumObj._id}>Delete Forum</button>
-                                    </li>
+                                    
                                     :
                                         []
                                 }
-                            </ul>
-                            <div className="card-footer" style={{backgroundColor: categoryColor}}>
-                                {forumObj._id}
-                            </div>
+                            </li>
+                        </ul>
+                        <div className="card-footer" style={{backgroundColor: categoryColor}}>
+                            {forumObj._id}
                         </div>
                     </div>
                     <div id={"deleteForumConfirmationModal_" + forumObj._id} className="modal fade">

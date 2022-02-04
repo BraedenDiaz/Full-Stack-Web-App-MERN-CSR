@@ -1,5 +1,5 @@
 import express from "express";
-import { deleteForum, getForumAuthor, getForums, insertNewForum } from "../api/db";
+import { deleteForum, getForumAuthor, getForumByID, getForums, insertNewForum } from "../api/db";
 import { isAuthenticated, isAuthorized } from "../helpers/authentication";
 import { check, validationResult } from "express-validator";
 import csurf from "csurf";
@@ -117,6 +117,29 @@ forumsRouter.delete("/:forumID/delete", isAuthenticated, async (req, res, next) 
             authenticated: false
         });
     }
+});
+
+forumsRouter.get("/:forumID", async (req, res, next) => {
+    const forumID : string = req.params.forumID;
+
+    try
+    {
+        const forumFromDatabase = await getForumByID(forumID);
+
+        if (forumFromDatabase !== null)
+        {
+            res.status(200).json(forumFromDatabase);
+        }
+        else
+        {
+            res.status(404).json({});
+        }
+    }
+    catch (err : any)
+    {
+        res.status(404).json({});
+    }
+
 });
 
 export default forumsRouter;

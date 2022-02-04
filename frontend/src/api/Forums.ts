@@ -77,8 +77,25 @@ export const deleteForum = async (forumID : string) => {
 
     const responseObj = {
         status: response.status,
-        json: response.json
+        json: await response.json()
     };
 
     return responseObj;
 };
+
+export const getForumByID = async (forumID : string) => {
+    const response = await fetch(`${API_ENDPOINT}/forums/${forumID}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: "include"
+    });
+
+    const responseObj = {
+        status: response.status,
+        json: await response.json()
+    };
+    
+    return responseObj;
+}

@@ -106,3 +106,11 @@ export async function deleteForum(forumID : string)
 
     return res;
 }
+
+////// CRUD Operations for the Specific Forum Page //////
+
+export async function getForumByID(forumID : string)
+{
+    const forum = await Forum.findById(forumID).exec();
+    return forum;
+}
