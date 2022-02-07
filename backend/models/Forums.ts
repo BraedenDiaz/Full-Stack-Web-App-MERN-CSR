@@ -2,9 +2,9 @@ import mongoose, { Schema } from "mongoose";
 
 export interface ForumInterface {
     author: Schema.Types.ObjectId,
-    title: string;
-    category: string;
-    description?: string;
+    title: string,
+    category: string,
+    description?: string
 }
 
 const forumSchema = new mongoose.Schema<ForumInterface>({

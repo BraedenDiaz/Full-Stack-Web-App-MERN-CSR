@@ -63,7 +63,7 @@ export default function Layout(props : PropsType)
     return (
         <div>
             <div className="p-5 bg-primary text-white">
-                <h1 className="display-2 text-center">A Website</h1>
+                <h1 className="display-2 text-center">Web of Forums</h1>
             </div>
             <div className="offcanvas offcanvas-end" id="sidebar">
                 <div className="offcanvas-header">
@@ -114,9 +114,6 @@ export default function Layout(props : PropsType)
                 </div>
             </nav>
             <Outlet context={[user, refreshUserInfo]} />
-            <div className="p-3 bg-primary text-white">
-                <h1 className="display-6 text-center">This is the footer.</h1>
-            </div>
         </div>
     );
 }

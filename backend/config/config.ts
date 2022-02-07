@@ -63,6 +63,9 @@ if (SESSION_COOKIE_SAME_SITE === "none" && SESSION_COOKIE_SECURE !== true)
     throw new Error("SESSION_COOKIE_SECURE must be true if SESSION_COOKIE_SAME_SITE is set to 'none'.");
 }
 
+// Username Requirements Configuration
+export const MAX_USERNAME_LENGTH : number = Number(process.env.MAX_USERNAME_LENGTH) || 50;
+
 // User Password Requirements Configuration
 export const MIN_PASSWORD_LENGTH : number = Number(process.env.MIN_PASSWORD_LENGTH) || 12;
 export const MAX_PASSWORD_LENGTH : number = Number(process.env.MAX_PASSWORD_LENGTH) || 100;

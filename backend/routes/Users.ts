@@ -2,7 +2,7 @@ import csurf from "csurf";
 import express from "express";
 import { check, validationResult } from "express-validator";
 import { deleteUser, updateUserProfile } from "../api/db";
-import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "../config/config";
+import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from "../config/config";
 import { hashAndSaltPassword, hasNoSpaceCharacters, isAuthenticated, isAuthorized } from "../helpers/authentication";
 
 const usersRouter = express.Router();
@@ -39,6 +39,8 @@ usersRouter.get("/:username", csrfProtection, isAuthenticated, (req, res, next) 
 usersRouter.put("/:username", csrfProtection, isAuthenticated, check("newUsername").custom(hasNoSpaceCharacters)
                                                  .isAscii()
                                                  .withMessage("Username must use ASCII characters only.")
+                                                 .isLength({ max: MAX_USERNAME_LENGTH })
+                                                 .withMessage(`Username can only be a max length of ${MAX_USERNAME_LENGTH} characters.`)
                                                  .stripLow()
                                                  .escape(),
                                                 check("newPassword")

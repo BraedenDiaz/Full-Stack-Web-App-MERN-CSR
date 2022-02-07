@@ -1,5 +1,5 @@
 import express from "express";
-import { deleteForum, getForumAuthor, getForumByID, getForums, insertNewForum } from "../api/db";
+import { deleteForum, getComments, getForumAuthor, getForumByID, getForums, insertNewComment, insertNewForum } from "../api/db";
 import { isAuthenticated, isAuthorized } from "../helpers/authentication";
 import { check, validationResult } from "express-validator";
 import csurf from "csurf";
@@ -61,21 +61,21 @@ forumsRouter.get("/create", csrfProtection, (req, res, next) => {
 });
 
 forumsRouter.post("/create", csrfProtection, isAuthenticated, check("forumTitle")
-                                                .isAscii()
-                                                .withMessage("The forum title must use ASCII characters only.")
-                                                .stripLow()
-                                                .escape(),
-                                              check("forumCategory")
-                                                .isAscii()
-                                                .withMessage("Category must use ASCII characters only.")
-                                                .stripLow()
-                                                .escape(),
-                                              check("forumDescription")
-                                                .isAscii()
-                                                .withMessage("The forum description must use ASCII characters only.")
-                                                .stripLow()
-                                                .escape(),
-                                                async (req, res, next) => {
+                                                                .isAscii()
+                                                                .withMessage("The forum title must use ASCII characters only.")
+                                                                .stripLow()
+                                                                .escape(),
+                                                            check("forumCategory")
+                                                                .isAscii()
+                                                                .withMessage("Category must use ASCII characters only.")
+                                                                .stripLow()
+                                                                .escape(),
+                                                            check("forumDescription")
+                                                                .isAscii()
+                                                                .withMessage("The forum description must use ASCII characters only.")
+                                                                .stripLow()
+                                                                .escape(),
+                                                                async (req, res, next) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty())
@@ -140,6 +140,56 @@ forumsRouter.get("/:forumID", async (req, res, next) => {
         res.status(404).json({});
     }
 
+});
+
+forumsRouter.get("/:forumID/comments", csrfProtection, async (req, res, next) => {
+    const forumID : string = req.params.forumID;
+
+    const commentsResult = await getComments(forumID);
+    res.status(200).json({
+        csrfToken: req.csrfToken(),
+        result: commentsResult
+    });
+});
+
+forumsRouter.post("/:forumID/comments", csrfProtection, isAuthenticated, check("comment")
+                                                                        .stripLow()
+                                                                        .escape(),
+                                                                        async (req, res, next) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+    {
+        return res.status(400).json({
+            errors: errors.array()
+        });
+    }
+
+    const forumID : string = req.params.forumID;
+    const { comment } = req.body;
+
+    try
+    {
+        await insertNewComment(req.session.user!.username, forumID, comment);
+        res.status(200).json({});
+    }
+    catch (err : any)
+    {
+        res.status(400).json({
+            errors: [{
+                msg: err
+            }]
+        });
+    }
+});
+
+forumsRouter.delete(":forumID/comments", isAuthenticated, async (req, res, next) => {
+    const forumID : string = req.params.forumID;
+});
+
+forumsRouter.delete("/:forumID/comments/:commentID", isAuthenticated, async (req, res, next) => {
+    const forumID : string = req.params.forumID;
+    const commentID : string = req.params.commentID;
 });
 
 export default forumsRouter;

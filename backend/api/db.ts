@@ -1,5 +1,6 @@
 import User, {UserInterface} from "../models/Users";
 import Forum from "../models/Forums";
+import Comment from "../models/Comments";
 
 /**
  * @author Braeden Diaz
@@ -103,7 +104,6 @@ export async function updateForum(forumID : string, newTitle : string, newCatego
 export async function deleteForum(forumID : string)
 {
     const res = await Forum.findByIdAndDelete(forumID).exec();
-
     return res;
 }
 
@@ -111,6 +111,64 @@ export async function deleteForum(forumID : string)
 
 export async function getForumByID(forumID : string)
 {
-    const forum = await Forum.findById(forumID).exec();
+    const forum = await Forum.findById(forumID).populate("author", "username").exec();
     return forum;
+}
+
+////// CRUD Operations for the Forum Comments //////
+
+export async function insertNewComment(authorUsername : string, forumID : string, comment : string)
+{
+    const user : (any | null) = await getUser(authorUsername);
+    const forum : (any | null) = await getForumByID(forumID);
+
+    if (user === null)
+    {
+        throw "Insert New Comment Error: Author username does not exist.";
+    }
+    else if (forum === null)
+    {
+        throw "Insert New Comment Error: Forum does not exist."
+    }
+
+    const newComment = new Comment({
+        author: user._id,
+        forum: forum._id,
+        comment: comment
+    });
+
+    return await newComment.save();
+}
+
+export async function getComments(forumID : string)
+{
+    const forum : (any | null) = await getForumByID(forumID);
+
+    if (forum === null)
+    {
+        throw "Get Comments Error: Forum does not exist."
+    }
+
+    const forumComments = await Comment.find({ forum: forumID }).populate("author", "username").exec();
+
+    return forumComments;
+}
+
+export async function deleteComment(commentID : string)
+{
+    const res = await Comment.findByIdAndDelete(commentID).exec();
+    return res;
+}
+
+export async function deleteAllCommentsInForum(forumID : string)
+{
+    const forum : (any | null) = await getForumByID(forumID);
+
+    if (forum === null)
+    {
+        throw "Delete All Comments Error: Forum does not exist."
+    }
+
+    const res = Comment.deleteMany({ forumID: forumID });
+    return res;
 }
