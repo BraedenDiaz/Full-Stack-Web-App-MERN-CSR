@@ -67,7 +67,7 @@ export const getCategories = async () => {
 };
 
 export const deleteForum = async (forumID : string) => {
-    const response = await fetch(`${API_ENDPOINT}/forums/${forumID}/delete`, {
+    const response = await fetch(`${API_ENDPOINT}/forums/${forumID}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json"

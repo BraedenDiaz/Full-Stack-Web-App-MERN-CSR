@@ -1,5 +1,5 @@
 import express from "express";
-import { deleteForum, getComments, getForumAuthor, getForumByID, getForums, insertNewComment, insertNewForum } from "../api/db";
+import { deleteAllCommentsInForum, deleteComment, deleteForum, getCommentAuthor, getCommentForumID, getComments, getForumAuthor, getForumByID, getForums, insertNewComment, insertNewForum } from "../api/db";
 import { isAuthenticated, isAuthorized } from "../helpers/authentication";
 import { check, validationResult } from "express-validator";
 import csurf from "csurf";
@@ -102,12 +102,13 @@ forumsRouter.post("/create", csrfProtection, isAuthenticated, check("forumTitle"
     }
 });
 
-forumsRouter.delete("/:forumID/delete", isAuthenticated, async (req, res, next) => {
+forumsRouter.delete("/:forumID", isAuthenticated, async (req, res, next) => {
     const forumID : string = req.params.forumID;
     const forumAuthor : string = await getForumAuthor(forumID);
     
     if (isAuthorized(forumAuthor, req, res, next))
     {
+        await deleteAllCommentsInForum(forumID);
         await deleteForum(forumID);
         res.status(200).json({});
     }
@@ -183,13 +184,43 @@ forumsRouter.post("/:forumID/comments", csrfProtection, isAuthenticated, check("
     }
 });
 
-forumsRouter.delete(":forumID/comments", isAuthenticated, async (req, res, next) => {
+forumsRouter.delete("/:forumID/comments", isAuthenticated, async (req, res, next) => {
     const forumID : string = req.params.forumID;
+    const forumAuthor = await getForumAuthor(forumID);
+
+    if (isAuthorized(forumAuthor, req, res, next))
+    {
+        await deleteAllCommentsInForum(forumID);
+        res.status(200).json({});
+    }
+    else
+    {
+        res.status(403).json({
+            authenticated: false
+        });
+    }
 });
 
 forumsRouter.delete("/:forumID/comments/:commentID", isAuthenticated, async (req, res, next) => {
     const forumID : string = req.params.forumID;
+    const forumAuthor : string = await getForumAuthor(forumID);
     const commentID : string = req.params.commentID;
+    const commentAuthor : string = await getCommentAuthor(commentID);
+    const forumIDFromComment : string = await getCommentForumID(commentID);
+
+    // Allow the user to delete their own comments or allow the forum author to delete any of the comments on their forum.
+    // Also make sure that the comment being removed by a forum author does in-fact belong to their forum.
+    if (isAuthorized(commentAuthor, req, res, next) || (isAuthorized(forumAuthor, req, res, next) && forumIDFromComment === forumID))
+    {
+        await deleteComment(commentID);
+        res.status(200).json({});
+    }
+    else
+    {
+        res.status(403).json({
+            authenticated: false
+        });
+    }
 });
 
 export default forumsRouter;

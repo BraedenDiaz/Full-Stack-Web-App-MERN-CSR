@@ -1,5 +1,5 @@
 import User, {UserInterface} from "../models/Users";
-import Forum from "../models/Forums";
+import Forum, {ForumInterface} from "../models/Forums";
 import Comment from "../models/Comments";
 
 /**
@@ -154,6 +154,24 @@ export async function getComments(forumID : string)
     return forumComments;
 }
 
+export async function getCommentAuthor(commentID : string)
+{
+    const comment = await Comment.findById(commentID).populate<{author: UserInterface}>("author", "username").exec();
+    return comment.author.username;
+}
+
+export async function getCommentForumID(commentID : string)
+{
+    const comment = await Comment.findById(commentID, "forum").exec();
+
+    if (comment === null)
+    {
+        throw "Get Comment Forum ID Error: Comment Not Found.";
+    }
+
+    return comment.forum.toString();
+}
+
 export async function deleteComment(commentID : string)
 {
     const res = await Comment.findByIdAndDelete(commentID).exec();
@@ -169,6 +187,6 @@ export async function deleteAllCommentsInForum(forumID : string)
         throw "Delete All Comments Error: Forum does not exist."
     }
 
-    const res = Comment.deleteMany({ forumID: forumID });
+    const res = Comment.deleteMany({ forum: forumID });
     return res;
 }

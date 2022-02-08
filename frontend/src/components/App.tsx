@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import FileNotFound from "./errors/404";
 import CreateNewForum from "./forums/CreateNewForum";
+import EditForumPage from "./forums/EditForumPage";
 import ForumListingsPage from "./forums/ForumListingsPage";
 import ForumPage from "./forums/ForumPage";
 import Home from "./Home";
@@ -36,6 +37,7 @@ function App() {
           <Route path="forums" element={<ForumListingsPage alert={alert} setAlert={setAlert}/>} />
           <Route path="forums/create" element={<CreateNewForum alert={alert} setAlert={setAlert} />} />
           <Route path="forums/:forumID" element={<ForumPage />} />
+          <Route path="forums/:forumID/edit" element={<EditForumPage />} />
           <Route path="*" element={<FileNotFound />} />
         </Route>
       </Routes>
