@@ -172,6 +172,15 @@ export async function getCommentForumID(commentID : string)
     return comment.forum.toString();
 }
 
+export async function updateComment(commentID : string, newComment : string)
+{
+    const res = await Comment.findByIdAndUpdate(commentID, {
+        comment: newComment
+    }).exec();
+
+    return res;
+}
+
 export async function deleteComment(commentID : string)
 {
     const res = await Comment.findByIdAndDelete(commentID).exec();

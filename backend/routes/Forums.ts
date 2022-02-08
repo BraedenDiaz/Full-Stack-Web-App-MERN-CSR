@@ -1,5 +1,5 @@
 import express from "express";
-import { deleteAllCommentsInForum, deleteComment, deleteForum, getCommentAuthor, getCommentForumID, getComments, getForumAuthor, getForumByID, getForums, insertNewComment, insertNewForum, updateForum } from "../api/db";
+import { deleteAllCommentsInForum, deleteComment, deleteForum, getCommentAuthor, getCommentForumID, getComments, getForumAuthor, getForumByID, getForums, insertNewComment, insertNewForum, updateComment, updateForum } from "../api/db";
 import { isAuthenticated, isAuthorized } from "../helpers/authentication";
 import { check, validationResult } from "express-validator";
 import csurf from "csurf";
@@ -241,6 +241,50 @@ forumsRouter.post("/:forumID/comments", csrfProtection, isAuthenticated, check("
             errors: [{
                 msg: err
             }]
+        });
+    }
+});
+
+forumsRouter.put("/:forumID/comments/:commentID", csrfProtection, isAuthenticated, check("comment")
+                                                                    .stripLow()
+                                                                    .escape(),
+                                                                    async (req, res, next) => {
+    
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+    {
+        return res.status(400).json({
+            errors: errors.array()
+        });
+    }
+
+    const forumID : string = req.params.forumID;
+    const commentID : string = req.params.commentID;
+    const commentAuthor : string = await getCommentAuthor(commentID);
+    const forumIDFromComment : string = await getCommentForumID(commentID);
+
+    const { comment: newComment } = req.body;
+
+    if (isAuthorized(commentAuthor, req, res, next) && forumIDFromComment === forumID)
+    {
+        try
+        {
+            await updateComment(commentID, newComment);
+            res.status(200).json({});
+        }
+        catch (err : any)
+        {
+            res.status(400).json({
+                errors: [{
+                    msg: err
+                }]
+            });
+        }
+    }
+    else
+    {
+        res.status(403).json({
+            authenticated: false
         });
     }
 });

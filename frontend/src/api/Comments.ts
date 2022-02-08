@@ -35,6 +35,27 @@ export const insertNewComment = async (forumID : string, comment : string, csrfT
     return responseObj;
 };
 
+export const updateComment = async (forumID : string, commentID : string, newComment : string, csrfToken : string) => {
+    const response = await fetch(`${API_ENDPOINT}/forums/${forumID}/comments/${commentID}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "XSRF-TOKEN": csrfToken
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            comment: newComment
+        })
+    });
+
+    const responseObj = {
+        status: response.status,
+        json: await response.json()
+    };
+
+    return responseObj;
+};
+
 export const deleteAllComments = async (forumID : string) => {
     const response = await fetch(`${API_ENDPOINT}/forums/${forumID}/comments`, {
         method: "DELETE",

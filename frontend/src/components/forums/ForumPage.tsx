@@ -1,7 +1,8 @@
+import { cp } from "fs/promises";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"
 import { getUser } from "../../api";
-import { deleteAllComments, deleteComment, getComments, insertNewComment } from "../../api/Comments";
+import { deleteAllComments, deleteComment, getComments, insertNewComment, updateComment } from "../../api/Comments";
 import { deleteForum, getForumByID } from "../../api/Forums";
 import FileNotFound from "../errors/404";
 
@@ -9,6 +10,8 @@ export default function ForumPage()
 {
     const [csrfToken, setCSRFToken] = useState("");
     const [comment, setComment] = useState("");
+    const [editComment, setEditComment] = useState("");
+    const [editedComment, setEditedComment] = useState("");
     const [user, setUser] = useState({
         authenticated: false,
         username: ""
@@ -113,11 +116,45 @@ export default function ForumPage()
 
         if (responseObj.status !== 200)
         {
-            console.log("Delete Forum Error: Response not status 200.");
+            console.log("Delete Forum Error: Response status not 200.");
         }
         else
         {
             navigate("/forums");
+        }
+    };
+
+    const handleEditComment = async (event : any, currentComment : string) => {
+        const editCommentBtnID : string = event.target.id;
+        const commentID : string = editCommentBtnID.substring(editCommentBtnID.lastIndexOf("_") + 1);
+        setEditComment(commentID);
+        setEditedComment(currentComment);
+    };
+
+    const handleEditCommentTextAreaChange = (event : any) => {
+        setEditedComment(event.target.value);
+    };
+
+    const handleCancelEditComment = (event : any) => {
+        setEditComment("");
+        setEditedComment("");
+    };
+
+    const handleSaveCommentBtnClick = async (event : any) => {
+        const saveCommentBtnID : string = event.target.id;
+        const commentID : string = saveCommentBtnID.substring(saveCommentBtnID.lastIndexOf("_") + 1);
+
+        const responseObj = await updateComment(forumID!, commentID, editedComment, csrfToken);
+
+        if (responseObj.status !== 200)
+        {
+            console.log("Update Comment Error: Response status not 200.");
+        }
+        else
+        {
+            setEditComment("");
+            setEditedComment("");
+            getCommentsForForum();
         }
     };
 
@@ -224,15 +261,45 @@ export default function ForumPage()
                                         {commentObj.author.username}
                                     </h4>
                                     <p className="card-text">
-                                        {commentObj.comment}
+                                        {
+                                            !(editComment === commentObj._id) ?
+                                                commentObj.comment
+                                            : 
+                                                <textarea name="editCommentTextArea"
+                                                            className="form-control"
+                                                            rows={4}
+                                                            onChange={handleEditCommentTextAreaChange}
+                                                            value={editedComment}></textarea>
+                                        }
                                     </p>
                                     {
-                                        user.authenticated && (user.username === commentObj.author.username || user.username === forumInfo.author.username) ?
-                                            <div className="clearfix">
-                                                <button id={`removeCommentBtn_${commentObj._id}`} type="button" className="btn btn-danger float-end" onClick={handleRemoveComment}>Remove</button>
-                                            </div>
+                                        !(editComment === commentObj._id) ?
+                                        
+                                            user.authenticated && (user.username === commentObj.author.username || user.username === forumInfo.author.username) ?
+                                                <div className="clearfix">
+                                                    <button id={`removeCommentBtn_${commentObj._id}`} type="button" className="btn btn-danger float-end" onClick={handleRemoveComment}>Remove</button>
+                                                    {
+                                                        user.authenticated && (user.username === commentObj.author.username)
+                                                        && 
+                                                        <button id={`editCommentBtn_${commentObj._id}`} type="button" className="btn btn-info text-white float-end me-1" onClick={(event) => handleEditComment(event, commentObj.comment)}>Edit</button>
+
+                                                    }
+                                                </div>
+                                            :
+                                                []
                                         :
-                                            []
+                                            user.authenticated && (user.username === commentObj.author.username || user.username === forumInfo.author.username) ?
+                                                <div className="clearfix">
+                                                    {
+                                                        user.authenticated && (user.username === commentObj.author.username)
+                                                        && 
+                                                        <button id={`cancelCommentBtn_${commentObj._id}`} type="button" className="btn btn-secondary float-end" onClick={handleCancelEditComment}>Cancel</button>
+
+                                                    }
+                                                    <button id={`saveCommentBtn_${commentObj._id}`} type="button" className="btn btn-success float-end me-1" onClick={handleSaveCommentBtnClick}>Save</button>
+                                                </div>
+                                            :
+                                                []
                                     }
                                 </div>
                             </div>
