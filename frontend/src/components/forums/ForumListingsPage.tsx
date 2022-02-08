@@ -66,6 +66,12 @@ export default function ForumListingsPage(props : PropsType)
         navigate("/forums/create");
     };
 
+    const handleEditForum = async (event : any) => {
+        const editForumBtnID : string = event.target.id;
+        const forumID : string = editForumBtnID.substring(editForumBtnID.lastIndexOf("_") + 1);
+        navigate(`/forums/${forumID}/edit`);
+    };
+
     const handleDeleteForum = async (event : any) => {
         const deleteForumBtnID : string = event.target.id;
         const forumID : string = deleteForumBtnID.substring(deleteForumBtnID.lastIndexOf("_") + 1);
@@ -101,6 +107,18 @@ export default function ForumListingsPage(props : PropsType)
         navigate(`/forums/${forumID}`);
     };
 
+    const shortenDescription = (description : string) => {
+        let newDescription = description;
+
+        if (description.length >= 35)
+        {
+            newDescription = newDescription.substring(0, 32);
+            newDescription += "...";
+        }
+
+        return newDescription;
+    };
+
     const forumCards = [];
     
     // Build the JSX HTML forum card for each forum
@@ -132,22 +150,23 @@ export default function ForumListingsPage(props : PropsType)
                         </div>
                         <div className="card-body">
                             <h4 className="card-title">{forumObj.title}</h4>
-                            <p className="card-text">{forumObj.description}</p>
+                            <p className="card-text">{shortenDescription(forumObj.description)}</p>
                         </div>
                         <ul className="list-group list-group-flush">
                             <li className="list-group-item">Author: {forumObj.author.username}</li>
                             <li className="list-group-item">Category: {forumObj.category}</li>
                             <li className="list-group-item">
-                                <button id={`enterForumBtn_${forumObj._id}`} type="button" className="btn btn-info text-white me-2" onClick={handleEnterForum}>Enter Forum</button>
-                                {
-                                    userIsForumAuthor ?
-                                    
-                                        <button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target={"#deleteForumConfirmationModal_" + forumObj._id}>Delete Forum</button>
-                                    
-                                    :
-                                        []
-                                }
+                                <button id={`enterForumBtn_${forumObj._id}`} type="button" className="btn btn-success" onClick={handleEnterForum}>Enter Forum</button>
                             </li>
+                            {
+                                userIsForumAuthor ?
+                                    <li className="list-group-item">
+                                        <button id={`enterForumBtn_${forumObj._id}`} type="button" className="btn btn-info text-white me-2" onClick={handleEditForum}>Edit Forum</button>
+                                        <button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target={"#deleteForumConfirmationModal_" + forumObj._id}>Delete Forum</button>
+                                    </li>
+                                :
+                                    []
+                            }
                         </ul>
                         <div className="card-footer" style={{backgroundColor: categoryColor}}>
                             {forumObj._id}

@@ -1,5 +1,5 @@
 import express from "express";
-import { deleteAllCommentsInForum, deleteComment, deleteForum, getCommentAuthor, getCommentForumID, getComments, getForumAuthor, getForumByID, getForums, insertNewComment, insertNewForum } from "../api/db";
+import { deleteAllCommentsInForum, deleteComment, deleteForum, getCommentAuthor, getCommentForumID, getComments, getForumAuthor, getForumByID, getForums, insertNewComment, insertNewForum, updateForum } from "../api/db";
 import { isAuthenticated, isAuthorized } from "../helpers/authentication";
 import { check, validationResult } from "express-validator";
 import csurf from "csurf";
@@ -139,6 +139,67 @@ forumsRouter.get("/:forumID", async (req, res, next) => {
     catch (err : any)
     {
         res.status(404).json({});
+    }
+
+});
+
+// forumsRouter.get("/:forumID/edit", csrfProtection, (req, res, next) => {
+//     res.status(200).json({
+//         csrfToken: req.csrfToken()
+//     });
+// });
+
+forumsRouter.put("/:forumID/edit", csrfProtection, isAuthenticated, check("forumTitle")
+                                                                .isAscii()
+                                                                .withMessage("The forum title must use ASCII characters only.")
+                                                                .stripLow()
+                                                                .escape(),
+                                                            check("forumCategory")
+                                                                .isAscii()
+                                                                .withMessage("Category must use ASCII characters only.")
+                                                                .stripLow()
+                                                                .escape(),
+                                                            check("forumDescription")
+                                                                .isAscii()
+                                                                .withMessage("The forum description must use ASCII characters only.")
+                                                                .stripLow()
+                                                                .escape(),
+                                                                async (req, res, next) => {
+    
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+    {
+        return res.status(400).json({
+            errors: errors.array()
+        });
+    }
+
+    const forumID = req.params.forumID;
+    const { forumTitle: newForumTitle, forumCategory: newForumCategory, forumDescription: newForumDescription } = req.body;
+    const forumAuthor = await getForumAuthor(forumID);
+
+
+    if (isAuthorized(forumAuthor, req, res, next))
+    {
+        try
+        {
+            await updateForum(forumID, newForumTitle, newForumCategory, newForumDescription);
+            res.status(200).json({});
+        }
+        catch (err : any)
+        {
+            res.status(400).json({
+                errors: [{
+                    msg: err
+                }]
+            });
+        }
+    }
+    else
+    {
+        res.status(403).json({
+            authenticated: false
+        });
     }
 
 });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCategories, getCSRFToken, getForumByID } from "../../api/Forums";
+import { getCategories, getCSRFToken, getForumByID, updateForum } from "../../api/Forums";
 import FormError from "../errors/FormError";
 
 export default function EditForumPage()
@@ -39,11 +39,10 @@ export default function EditForumPage()
         .then(responseObj => {
             if (responseObj.status === 200)
             {
-                console.log(responseObj);
                 setForumInfo(responseObj.json);
-                setForumTitle(forumInfo.title);
-                setForumCategory(forumInfo.category);
-                setForumDescription(forumInfo.description);
+                setForumTitle(responseObj.json.title);
+                setForumCategory(responseObj.json.category);
+                setForumDescription(responseObj.json.description);
             }
         });
 
@@ -69,8 +68,24 @@ export default function EditForumPage()
         }
     };
 
-    const handleFormSubmit = (event : any) => {
+    const handleFormSubmit = async (event : any) => {
         event.preventDefault();
+
+        const responseObj = await updateForum(forumID!, forumTitle, forumCategory, forumDescription, csrfToken);
+
+        if (responseObj.status === 400)
+        {
+            setErrorState({
+                show: true,
+                errorsArr: responseObj.json.errors.map((errorObj : any) => {
+                    return errorObj.msg;
+                })
+            });
+        }
+        else
+        {
+            navigate(-1);
+        }
     };
 
     return (
@@ -93,7 +108,7 @@ export default function EditForumPage()
                     <select id="forumCategory"
                             name="forumCategory"
                             className="form-select"
-                            defaultValue={forumCategory}
+                            value={forumCategory}
                             onChange={handleChange}>
                         <option value="" disabled>Select a forum category...</option>
                         {categories.map(category => <option key={"category_" + category} value={category}>{category}</option>)}
@@ -107,7 +122,7 @@ export default function EditForumPage()
                               value={forumDescription}
                               placeholder="Enter a description for your new forum."></textarea>
                 </div>
-                <button type="submit" className="btn btn-primary">Create</button>
+                <button type="submit" className="btn btn-primary">Save</button>
             </form>
         </div>
     );

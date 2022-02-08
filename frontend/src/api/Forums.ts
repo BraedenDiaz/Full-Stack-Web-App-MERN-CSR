@@ -66,6 +66,30 @@ export const getCategories = async () => {
     return responseJSON;
 };
 
+export const updateForum = async(forumID : string, forumTitle : string, forumCategory : string, forumDescription : string, csrfToken : any) => {
+    const response = await fetch(`${API_ENDPOINT}/forums/${forumID}/edit`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "XSRF-TOKEN": csrfToken
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            forumTitle: forumTitle,
+            forumCategory: forumCategory,
+            forumDescription: forumDescription
+        })
+    });
+
+    const responseJSON = await response.json();
+    const responseObj = {
+        status: response.status,
+        json: responseJSON
+    };
+
+    return responseObj;
+};
+
 export const deleteForum = async (forumID : string) => {
     const response = await fetch(`${API_ENDPOINT}/forums/${forumID}`, {
         method: "DELETE",
