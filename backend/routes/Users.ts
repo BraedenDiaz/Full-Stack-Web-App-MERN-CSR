@@ -105,6 +105,7 @@ usersRouter.delete("/:username", isAuthenticated, async (req, res, next) => {
     {
         try
         {
+            
             await deleteUser(username);
             req.session.destroy(err => {
                 if (err)

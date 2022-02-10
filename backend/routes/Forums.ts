@@ -215,6 +215,8 @@ forumsRouter.get("/:forumID/comments", csrfProtection, async (req, res, next) =>
 });
 
 forumsRouter.post("/:forumID/comments", csrfProtection, isAuthenticated, check("comment")
+                                                                        .isAscii()
+                                                                        .withMessage("Your comment must not be empty.")
                                                                         .stripLow()
                                                                         .escape(),
                                                                         async (req, res, next) => {
@@ -246,9 +248,11 @@ forumsRouter.post("/:forumID/comments", csrfProtection, isAuthenticated, check("
 });
 
 forumsRouter.put("/:forumID/comments/:commentID", csrfProtection, isAuthenticated, check("comment")
-                                                                    .stripLow()
-                                                                    .escape(),
-                                                                    async (req, res, next) => {
+                                                                                    .isAscii()
+                                                                                    .withMessage("Your comment must not be empty.")
+                                                                                    .stripLow()
+                                                                                    .escape(),
+                                                                                    async (req, res, next) => {
     
     const errors = validationResult(req);
     if (!errors.isEmpty())

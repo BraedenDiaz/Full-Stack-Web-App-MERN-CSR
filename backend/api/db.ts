@@ -1,6 +1,8 @@
 import User, {UserInterface} from "../models/Users";
 import Forum, {ForumInterface} from "../models/Forums";
 import Comment from "../models/Comments";
+import { Schema } from "mongoose";
+import forumsRouter from "../routes/Forums";
 
 /**
  * @author Braeden Diaz
@@ -20,7 +22,9 @@ import Comment from "../models/Comments";
  
      const newUser = new User({
          username: username,
-         password: hashedPassword
+         password: hashedPassword,
+         comments: [],
+         forums: []
      });
  
      return await newUser.save();
@@ -47,11 +51,66 @@ export async function updateUserProfile(username : string, newUsername : string,
 
 export async function deleteUser(username : string)
 {
+    // First, delete all the user's comments, then the user's forums, and then the user itself
+    await deleteAllCommentsForUser(username);
+    await deleteAllForumsForUser(username);
     const res = await User.deleteOne({ username: username });
 
     if (!(res.deletedCount === 1))
     {
         throw "User Delete Failed";
+    }
+}
+
+export async function deleteAllCommentsForUser(username : string)
+{
+    const user = await User.findOne({ username: username }, "comments").exec();
+
+    if (user === null)
+    {
+        throw `Delete All Comments for User Error: ${username} does not exist.`;
+    }
+
+    const userComments : Schema.Types.ObjectId[] = user.comments;
+    for (let comment of userComments)
+    {
+        const commentDoc = await Comment.findById(comment, "_id");
+
+        if (commentDoc === null)
+        {
+            continue;
+        }
+
+        await Comment.findByIdAndDelete(commentDoc._id);
+    }
+}
+
+export async function deleteAllForumsForUser(username : string)
+{
+    // Get the user from the username and only select the "forums" entry
+    const user = await User.findOne({ username: username }, "forums").exec();
+
+    if (user === null)
+    {
+        throw `Delete All Forums for User Error: ${username} does not exist.`;
+    }
+
+    // Retieve the user's forums array
+    const userForums : Schema.Types.ObjectId[] = user.forums;
+
+    // For each of the user's forums
+    for (let forum of userForums)
+    {
+        const forumDoc = await Forum.findById(forum, "_id");
+
+        if (forumDoc === null)
+        {
+            continue;
+        }
+
+        // First, delete all the comments in the current forum, and then delete the current forum itself
+        await deleteAllCommentsInForum(forumDoc._id.toString());
+        await Forum.findByIdAndDelete(forumDoc._id);
     }
 }
 
@@ -71,6 +130,10 @@ export async function insertNewForum(authorUsername : string, forumTitle : strin
         title: forumTitle,
         category: forumCategory,
         description: forumDescription
+    });
+
+    await User.findByIdAndUpdate(user._id, {
+        forums: newForum._id
     });
 
     return await newForum.save();
@@ -135,6 +198,10 @@ export async function insertNewComment(authorUsername : string, forumID : string
         author: user._id,
         forum: forum._id,
         comment: comment
+    });
+
+    await User.findByIdAndUpdate(user._id, {
+        comments: newComment._id
     });
 
     return await newComment.save();

@@ -1,10 +1,10 @@
-import { cp } from "fs/promises";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"
 import { getUser } from "../../api";
 import { deleteAllComments, deleteComment, getComments, insertNewComment, updateComment } from "../../api/Comments";
 import { deleteForum, getForumByID } from "../../api/Forums";
 import FileNotFound from "../errors/404";
+import FormError from "../errors/FormError";
 
 export default function ForumPage()
 {
@@ -198,7 +198,7 @@ export default function ForumPage()
     }
     return (
         <div className="container mt-4 mb-4">
-            <div className="card">
+            <div className="card mb-2">
                 <div className="card-header text-center h3">
                     {forumInfo.title}
                 </div>
@@ -239,6 +239,7 @@ export default function ForumPage()
             {
                 user.authenticated &&
                 <div className="clearfix">
+                    <FormError show={errorState.show} errorsArr={errorState.errorsArr} />
                     <form onSubmit={handleAddCommentFormSubmit}>
                         <textarea name="commentTextArea"
                                 className="form-control mt-2"
@@ -248,6 +249,7 @@ export default function ForumPage()
                                 placeholder="Enter a comment..."></textarea>
                         <button type="submit" className="btn btn-primary mt-1 float-end">Comment</button>
                     </form>
+                    
                 </div>
             }
             <div className="mt-1">
