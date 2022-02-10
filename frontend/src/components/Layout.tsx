@@ -3,7 +3,11 @@ import { Outlet, Link, useOutletContext } from "react-router-dom";
 
 import { API_ENDPOINT, getUser } from "../api/index";
 
-type PropsType = object;
+type PropsType = {
+    isLoggingOut: boolean,
+    setIsLoggingOut: React.Dispatch<React.SetStateAction<boolean>>
+};
+
 type User = { authenticated: boolean, username: string };
 type ContextType = [User, () => void];
 
@@ -28,6 +32,11 @@ export default function Layout(props : PropsType)
     const refreshUserInfo = () => {
         getUser()
         .then(responseJSON => {
+            if (responseJSON.authenticated)
+            {
+                props.setIsLoggingOut(false);
+            }
+            
             setUser({
                 authenticated: responseJSON.authenticated,
                 username: responseJSON.username
@@ -56,6 +65,7 @@ export default function Layout(props : PropsType)
                     authenticated: false,
                     username: ""
                 });
+                props.setIsLoggingOut(true);
             }
         });
     };

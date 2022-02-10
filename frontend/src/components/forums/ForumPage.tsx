@@ -6,7 +6,11 @@ import { deleteForum, getForumByID } from "../../api/Forums";
 import FileNotFound from "../errors/404";
 import FormError from "../errors/FormError";
 
-export default function ForumPage()
+type PropsType = {
+    isLoggingOut: boolean,
+};
+
+export default function ForumPage(props : PropsType)
 {
     const [csrfToken, setCSRFToken] = useState("");
     const [comment, setComment] = useState("");
@@ -74,7 +78,7 @@ export default function ForumPage()
         });
 
         getCommentsForForum();
-    }, []);
+    });
 
     const handleCommentTextAreaChange = (event : any) => {
         setComment(event.target.value);
@@ -219,7 +223,7 @@ export default function ForumPage()
                     <p className="card-text">
                         <strong>Category:</strong> {forumInfo.category}
                     </p>
-                    <p className="card-text">
+                    <p className="card-text" style={{whiteSpace: "pre-wrap"}}>
                         {forumInfo.description}
                     </p>
                     {
@@ -262,10 +266,20 @@ export default function ForumPage()
                                     <h4 className="card-title">
                                         {commentObj.author.username}
                                     </h4>
-                                    <p className="card-text">
+                                    <p className="card-text" style={{whiteSpace: "pre-wrap"}}>
                                         {
                                             !(editComment === commentObj._id) ?
                                                 commentObj.comment
+                                            
+                                                // A way to turn newline characters into <br /> tags
+                                                // Only use if you need something like list bullets, otherwise,
+                                                // use the whiteSpace CSS property.
+                                                // commentObj.comment.split('\n').map((line, i) => {
+                                                //     <span key={i}>
+                                                //         {line}
+                                                //         <br />
+                                                //     </span>
+                                                // })
                                             : 
                                                 <textarea name="editCommentTextArea"
                                                             className="form-control"

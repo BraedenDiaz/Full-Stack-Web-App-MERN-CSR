@@ -7,5 +7,9 @@
 
 export default function ErrorUnauthorized()
 {
-    return <h1>403 Error: Unauthorized</h1>;
+    return (
+        <div className="container mt-4">
+            <h1>403 Error: Unauthorized</h1>
+        </div>
+    );
 }

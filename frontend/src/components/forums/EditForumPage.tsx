@@ -1,16 +1,29 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getUser } from "../../api";
 import { getCategories, getCSRFToken, getForumByID, updateForum } from "../../api/Forums";
+import ErrorUnauthorized from "../errors/403";
+import FileNotFound from "../errors/404";
 import FormError from "../errors/FormError";
 
-export default function EditForumPage()
+type PropsType = {
+    isLoggingOut: boolean
+};
+
+export default function EditForumPage(props : PropsType)
 {
     const navigate = useNavigate();
+    const [user, setUser] = useState({
+        authenticated: false,
+    });
     const [csrfToken, setCSRFToken] = useState("");
     const [forumTitle, setForumTitle] = useState("");
     const [forumCategory, setForumCategory] = useState("");
     const [forumDescription, setForumDescription] = useState("");
     const [categories, setCategories] = useState([""]);
+
+    const [error404, setError404] = useState(false);
+    const [error403, setError403] = useState(false);
     const [errorState, setErrorState] = useState({
         show: false,
         errorsArr: []
@@ -18,18 +31,19 @@ export default function EditForumPage()
 
     const { forumID } = useParams();
 
-    const [forumInfo, setForumInfo] = useState({
-        _id: "",
-        author: {
-            _id: "",
-            username: ""
-        },
-        title: "",
-        category: "",
-        description: ""
-    });
+    useEffect(() => {
+        if (props.isLoggingOut)
+        {
+            navigate("/");
+        }
+    }, [props.isLoggingOut]);
 
     useEffect(() => {
+        getUser()
+        .then(responseJSON => {
+            setUser(responseJSON);
+        });
+        
         getCSRFToken()
         .then(responseJSON => {
             setCSRFToken(responseJSON.csrfToken)
@@ -39,10 +53,17 @@ export default function EditForumPage()
         .then(responseObj => {
             if (responseObj.status === 200)
             {
-                setForumInfo(responseObj.json);
                 setForumTitle(responseObj.json.title);
                 setForumCategory(responseObj.json.category);
                 setForumDescription(responseObj.json.description);
+            }
+            else if (responseObj.status === 403)
+            {
+                setError403(true);
+            }
+            else if (responseObj.status === 404)
+            {
+                setError404(true);
             }
         });
 
@@ -87,6 +108,20 @@ export default function EditForumPage()
             navigate(-1);
         }
     };
+
+    if (error404)
+    {
+        return <FileNotFound />;
+    }
+    else if (error403)
+    {
+        return <ErrorUnauthorized />;
+    }
+
+    if (!user.authenticated)
+    {
+        return <ErrorUnauthorized />;
+    }
 
     return (
         <div className="container mt-4 mb-4">

@@ -25,7 +25,9 @@ registerRouter.post("/", csrfProtection, check("username").custom(hasNoSpaceChar
                                          .withMessage("Username must use ASCII characters only.")
                                          .stripLow()                    // Strip all the control-based ASCII characters
                                          .escape(),                     // Replace special characters with HTML encodings
-                        check("password").custom(hasNoSpaceCharacters)
+                                        check("password")
+                                        .custom(hasNoSpaceCharacters)
+                                        .withMessage("Password must not have any spaces.")
                                         .isAscii()
                                         .withMessage("Username must use ASCII characters only.")
                                         // Make sure the password satisfies the length requirements

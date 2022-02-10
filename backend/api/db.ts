@@ -1,8 +1,7 @@
 import User, {UserInterface} from "../models/Users";
-import Forum, {ForumInterface} from "../models/Forums";
+import Forum from "../models/Forums";
 import Comment from "../models/Comments";
 import { Schema } from "mongoose";
-import forumsRouter from "../routes/Forums";
 
 /**
  * @author Braeden Diaz

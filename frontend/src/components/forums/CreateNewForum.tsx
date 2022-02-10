@@ -1,6 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getUser } from "../../api";
 import { getCategories, getCSRFToken, insertNewForum } from "../../api/Forums";
+import ErrorUnauthorized from "../errors/403";
+import FileNotFound from "../errors/404";
 import FormError from "../errors/FormError";
 
 /**
@@ -12,6 +15,7 @@ import FormError from "../errors/FormError";
  */
 
  type PropsType = {
+    isLoggingOut: boolean,
     alert: {
         show: boolean,
         type : string,
@@ -23,17 +27,35 @@ import FormError from "../errors/FormError";
 export default function CreateNewForum(props : PropsType)
 {
     const navigate = useNavigate();
+    const [user, setUser] = useState({
+        authenticated: false,
+    });
     const [csrfToken, setCSRFToken] = useState("");
     const [forumTitle, setForumTitle] = useState("");
     const [forumCategory, setForumCategory] = useState("");
     const [forumDescription, setForumDescription] = useState("");
     const [categories, setCategories] = useState([""]);
+
+    const [error404, setError404] = useState(false);
+    const [error403, setError403] = useState(false);
     const [errorState, setErrorState] = useState({
         show: false,
         errorsArr: []
     });
 
     useEffect(() => {
+        if (props.isLoggingOut)
+        {
+            navigate("/");
+        }
+    }, [props.isLoggingOut]);
+
+    useEffect(() => {
+        getUser()
+        .then(responseJSON => {
+            setUser(responseJSON);
+        });
+        
         getCSRFToken()
         .then(responseJSON => {
             setCSRFToken(responseJSON.csrfToken)
@@ -74,16 +96,7 @@ export default function CreateNewForum(props : PropsType)
 
         insertNewForum(forumTitle, forumCategory, forumDescription, csrfToken)
         .then(responseObj => {
-            if (responseObj.status === 400)
-            {
-                setErrorState({
-                    show: true,
-                    errorsArr: responseObj.json.errors.map((errorObj : any) => {
-                        return errorObj.msg;
-                    })
-                });
-            }
-            else
+            if (responseObj.status === 200)
             {
                 props.setAlert({
                     show: true,
@@ -92,8 +105,39 @@ export default function CreateNewForum(props : PropsType)
                 });
                 navigate("/forums");
             }
+            else if (responseObj.status === 400)
+            {
+                setErrorState({
+                    show: true,
+                    errorsArr: responseObj.json.errors.map((errorObj : any) => {
+                        return errorObj.msg;
+                    })
+                });
+            }
+            else if (responseObj.status === 403)
+            {
+                setError403(true);
+            }
+            else if (responseObj.status === 404)
+            {
+                setError404(true);
+            }
         });
     };
+  
+    if (error404)
+    {
+        return <FileNotFound />;
+    }
+    else if (error403)
+    {
+        return <ErrorUnauthorized />;
+    }
+
+    if (!user.authenticated)
+    {
+        return <ErrorUnauthorized />;
+    }
 
     return (
         <div className="container mt-4 mb-4">

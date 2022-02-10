@@ -7,5 +7,9 @@
 
 export default function FileNotFound()
 {
-    return <h1>404 Error: File Not Found.</h1>;
+    return (
+        <div className="container mt-4">
+            <h1>404 Error: File Not Found.</h1>
+        </div>
+    );
 }

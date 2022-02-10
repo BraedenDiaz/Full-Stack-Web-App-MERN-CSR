@@ -66,10 +66,19 @@ export const isAuthorized = (authorizedUser : string, req : express.Request, res
 
 ////// Custom Validators for use with express-validator //////
 
-export const hasNoSpaceCharacters : CustomValidator = (value) => {
+export const hasNoSpaceCharacters : CustomValidator = (value : string) => {
     if (/\s/.test(value))
     {
         throw new Error("Space characters are not allowed.");
+    }
+
+    return true;
+};
+
+export const isNotEmpty : CustomValidator = (value : string) => {
+    if (value === "")
+    {
+        throw new Error("Empty string is not allowed.")
     }
 
     return true;

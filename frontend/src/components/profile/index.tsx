@@ -1,8 +1,42 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getUser } from "../../api";
+import ErrorUnauthorized from "../errors/403";
 import AccountPage from "./AccountPage";
 import ProfilePage from "./ProfilePage";
 
-export default function UserAccountPage()
+type PropsType = {
+    isLoggingOut: boolean,
+};
+
+export default function UserAccountPage(props : PropsType)
 {
+    const navigate = useNavigate();
+
+    const [user, setUser] = useState({
+        authenticated: false,
+    });
+
+    useEffect(() => {
+        if (props.isLoggingOut)
+        {
+            navigate("/");
+        }
+    });
+
+    useEffect(() => {
+        getUser()
+        .then(responseJSON => {
+            setUser(responseJSON);
+        });
+    }, []);
+
+    if (!user.authenticated)
+    {
+        return <ErrorUnauthorized />;
+    }
+ 
+
     return (
         <div className="container mt-3">
             <ul className="nav nav-tabs">

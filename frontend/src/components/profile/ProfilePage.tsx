@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getUserProfile, saveUserProfile } from "../../api/Users";
-import ErrorUnauthorized from "../errors/403";
 import FormError from "../errors/FormError";
 
 export default function ProfilePage()
@@ -17,34 +16,14 @@ export default function ProfilePage()
         errorsArr: []
     });
 
-    const [user, setUser] = useState({
-        authenticated: false,
-        username: "",
-        password: ""
-    });
     useEffect(() => {
         getUserProfile(username!)
         .then(responseObj => {
             if (responseObj.status === 200)
             {
                 setCSRFToken(responseObj.json.csrfToken);
-
-                setUser({
-                    authenticated: responseObj.json.authenticated,
-                    username: responseObj.json.username,
-                    password: responseObj.json.password
-                });
-
                 setNewUsername(responseObj.json.username);
                 setNewPassword(responseObj.json.password);
-            }
-            else if (responseObj.status === 403)
-            {
-                setUser({
-                    authenticated: responseObj.json.authenticated,
-                    username: "",
-                    password: ""
-                });
             }
             else if (responseObj.status === 404)
             {
@@ -90,11 +69,6 @@ export default function ProfilePage()
         }
 
     };
-
-    if (!user.authenticated)
-    {
-        return <ErrorUnauthorized />;
-    }
 
     return (
         <div className="container mt-3 mb-3">

@@ -1,6 +1,7 @@
 import express from "express";
 import { deleteAllCommentsInForum, deleteComment, deleteForum, getCommentAuthor, getCommentForumID, getComments, getForumAuthor, getForumByID, getForums, insertNewComment, insertNewForum, updateComment, updateForum } from "../api/db";
-import { isAuthenticated, isAuthorized } from "../helpers/authentication";
+import { isAuthenticated, isAuthorized, isNotEmpty } from "../helpers/authentication";
+import validator from 'validator';
 import { check, validationResult } from "express-validator";
 import csurf from "csurf";
 
@@ -61,8 +62,8 @@ forumsRouter.get("/create", csrfProtection, (req, res, next) => {
 });
 
 forumsRouter.post("/create", csrfProtection, isAuthenticated, check("forumTitle")
-                                                                .isAscii()
-                                                                .withMessage("The forum title must use ASCII characters only.")
+                                                                .custom(isNotEmpty)
+                                                                .withMessage("Forum title must not be empty.")
                                                                 .stripLow()
                                                                 .escape(),
                                                             check("forumCategory")
@@ -71,9 +72,8 @@ forumsRouter.post("/create", csrfProtection, isAuthenticated, check("forumTitle"
                                                                 .stripLow()
                                                                 .escape(),
                                                             check("forumDescription")
-                                                                .isAscii()
-                                                                .withMessage("The forum description must use ASCII characters only.")
-                                                                .stripLow()
+                                                                .custom(isNotEmpty)
+                                                                .withMessage("Forum description must not be empty.")
                                                                 .escape(),
                                                                 async (req, res, next) => {
 
@@ -114,9 +114,7 @@ forumsRouter.delete("/:forumID", isAuthenticated, async (req, res, next) => {
     }
     else
     {
-        res.status(403).json({
-            authenticated: false
-        });
+        res.status(403).json({});
     }
 });
 
@@ -126,6 +124,9 @@ forumsRouter.get("/:forumID", async (req, res, next) => {
     try
     {
         const forumFromDatabase = await getForumByID(forumID);
+
+        forumFromDatabase.title = validator.unescape(forumFromDatabase.title);
+        forumFromDatabase.description = validator.unescape(forumFromDatabase.description!);
 
         if (forumFromDatabase !== null)
         {
@@ -143,15 +144,9 @@ forumsRouter.get("/:forumID", async (req, res, next) => {
 
 });
 
-// forumsRouter.get("/:forumID/edit", csrfProtection, (req, res, next) => {
-//     res.status(200).json({
-//         csrfToken: req.csrfToken()
-//     });
-// });
-
 forumsRouter.put("/:forumID/edit", csrfProtection, isAuthenticated, check("forumTitle")
-                                                                .isAscii()
-                                                                .withMessage("The forum title must use ASCII characters only.")
+                                                                .custom(isNotEmpty)
+                                                                .withMessage("Forum title must not be empty.")
                                                                 .stripLow()
                                                                 .escape(),
                                                             check("forumCategory")
@@ -160,9 +155,8 @@ forumsRouter.put("/:forumID/edit", csrfProtection, isAuthenticated, check("forum
                                                                 .stripLow()
                                                                 .escape(),
                                                             check("forumDescription")
-                                                                .isAscii()
-                                                                .withMessage("The forum description must use ASCII characters only.")
-                                                                .stripLow()
+                                                                .custom(isNotEmpty)
+                                                                .withMessage("Forum description must not be empty.")
                                                                 .escape(),
                                                                 async (req, res, next) => {
     
@@ -197,9 +191,7 @@ forumsRouter.put("/:forumID/edit", csrfProtection, isAuthenticated, check("forum
     }
     else
     {
-        res.status(403).json({
-            authenticated: false
-        });
+        res.status(403).json({});
     }
 
 });
@@ -208,6 +200,12 @@ forumsRouter.get("/:forumID/comments", csrfProtection, async (req, res, next) =>
     const forumID : string = req.params.forumID;
 
     const commentsResult = await getComments(forumID);
+
+    for (let commentObj of commentsResult)
+    {
+        commentObj.comment = validator.unescape(commentObj.comment);
+    }
+
     res.status(200).json({
         csrfToken: req.csrfToken(),
         result: commentsResult
@@ -215,9 +213,8 @@ forumsRouter.get("/:forumID/comments", csrfProtection, async (req, res, next) =>
 });
 
 forumsRouter.post("/:forumID/comments", csrfProtection, isAuthenticated, check("comment")
-                                                                        .isAscii()
-                                                                        .withMessage("Your comment must not be empty.")
-                                                                        .stripLow()
+                                                                        .custom(isNotEmpty)
+                                                                        .withMessage("Comment must not be empty.")
                                                                         .escape(),
                                                                         async (req, res, next) => {
 
@@ -248,9 +245,8 @@ forumsRouter.post("/:forumID/comments", csrfProtection, isAuthenticated, check("
 });
 
 forumsRouter.put("/:forumID/comments/:commentID", csrfProtection, isAuthenticated, check("comment")
-                                                                                    .isAscii()
-                                                                                    .withMessage("Your comment must not be empty.")
-                                                                                    .stripLow()
+                                                                                    .custom(isNotEmpty)
+                                                                                    .withMessage("Comment must not be empty.")
                                                                                     .escape(),
                                                                                     async (req, res, next) => {
     
@@ -287,9 +283,7 @@ forumsRouter.put("/:forumID/comments/:commentID", csrfProtection, isAuthenticate
     }
     else
     {
-        res.status(403).json({
-            authenticated: false
-        });
+        res.status(403).json({});
     }
 });
 
@@ -326,9 +320,7 @@ forumsRouter.delete("/:forumID/comments/:commentID", isAuthenticated, async (req
     }
     else
     {
-        res.status(403).json({
-            authenticated: false
-        });
+        res.status(403).json({});
     }
 });
 

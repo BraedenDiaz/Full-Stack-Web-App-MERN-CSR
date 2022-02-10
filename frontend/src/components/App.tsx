@@ -21,6 +21,7 @@ import UserAccountPage from "./profile";
 
 
 function App() {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [alert, setAlert] = useState({
     show: false,
     type: "success",
@@ -30,14 +31,14 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="/" element={<Layout isLoggingOut={isLoggingOut} setIsLoggingOut={setIsLoggingOut} />}>
           <Route index element={<Home />} />
           <Route path="login" element={<LoginRegisterContainer />} />
-          <Route path="users/:username" element={<UserAccountPage />} />
-          <Route path="forums" element={<ForumListingsPage alert={alert} setAlert={setAlert}/>} />
-          <Route path="forums/create" element={<CreateNewForum alert={alert} setAlert={setAlert} />} />
-          <Route path="forums/:forumID" element={<ForumPage />} />
-          <Route path="forums/:forumID/edit" element={<EditForumPage />} />
+          <Route path="users/:username" element={<UserAccountPage isLoggingOut={isLoggingOut} />} />
+          <Route path="forums" element={<ForumListingsPage isLoggingOut={isLoggingOut} alert={alert} setAlert={setAlert}/>} />
+          <Route path="forums/create" element={<CreateNewForum isLoggingOut={isLoggingOut} alert={alert} setAlert={setAlert} />} />
+          <Route path="forums/:forumID" element={<ForumPage isLoggingOut={isLoggingOut} />} />
+          <Route path="forums/:forumID/edit" element={<EditForumPage isLoggingOut={isLoggingOut} />} />
           <Route path="*" element={<FileNotFound />} />
         </Route>
       </Routes>

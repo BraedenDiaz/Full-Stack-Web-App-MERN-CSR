@@ -13,6 +13,7 @@ import { deleteForum, getCategories, getForums } from "../../api/Forums";
  */
 
 type PropsType = {
+    isLoggingOut: boolean,
     alert: {
         show: boolean,
         type : string,
@@ -60,7 +61,7 @@ export default function ForumListingsPage(props : PropsType)
         .then(responseJSON => {
             setForums(responseJSON);
         });
-    },  [refresh]);
+    },  [refresh, props.isLoggingOut]);
 
     const handleCreateNewForumBtnClick = () => {
         navigate("/forums/create");

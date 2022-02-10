@@ -1,5 +1,6 @@
 import csurf from "csurf";
 import express from "express";
+import validator from "validator";
 import { check, validationResult } from "express-validator";
 import { deleteUser, updateUserProfile } from "../api/db";
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, MIN_PASSWORD_LENGTH } from "../config/config";
@@ -11,9 +12,7 @@ const csrfProtection = csurf();
 
 // Never return all users
 usersRouter.get("/", (req, res, next) => {
-    res.status(403).json({
-        authenticated: false
-    });
+    res.status(403).json({});
 });
 
 usersRouter.get("/:username", csrfProtection, isAuthenticated, (req, res, next) => {
@@ -23,20 +22,20 @@ usersRouter.get("/:username", csrfProtection, isAuthenticated, (req, res, next) 
     {
         res.status(200).json({
             authenticated: req.session.authenticated,
-            username: req.session.user?.username,
-            password: req.session.user?.password,
+            username: validator.unescape(req.session.user!.username),
+            password: validator.unescape(req.session.user!.password),
             csrfToken: req.csrfToken()
         });
     }
     else
     {
-        res.status(403).json({
-            authenticated: false
-        });
+        res.status(403).json({});
     }
 });
 
-usersRouter.put("/:username", csrfProtection, isAuthenticated, check("newUsername").custom(hasNoSpaceCharacters)
+usersRouter.put("/:username", csrfProtection, isAuthenticated, check("newUsername")
+                                                 .custom(hasNoSpaceCharacters)
+                                                 .withMessage("Password must not have any spaces.")
                                                  .isAscii()
                                                  .withMessage("Username must use ASCII characters only.")
                                                  .isLength({ max: MAX_USERNAME_LENGTH })
@@ -44,6 +43,8 @@ usersRouter.put("/:username", csrfProtection, isAuthenticated, check("newUsernam
                                                  .stripLow()
                                                  .escape(),
                                                 check("newPassword")
+                                                 .custom(hasNoSpaceCharacters)
+                                                 .withMessage("Password must not have any spaces.")
                                                  .isAscii()
                                                  .withMessage("Username must use ASCII characters only.")
                                                  .isLength({ min: MIN_PASSWORD_LENGTH, max: MAX_PASSWORD_LENGTH })
@@ -79,6 +80,8 @@ usersRouter.put("/:username", csrfProtection, isAuthenticated, check("newUsernam
         try
         {
             await updateUserProfile(username, newUsername, hashedPassword);
+            req.session.user!.username = newUsername;
+            req.session.user!.password = newPassword;
             res.status(200).json({});
         }
         catch (err : any)
@@ -92,9 +95,7 @@ usersRouter.put("/:username", csrfProtection, isAuthenticated, check("newUsernam
     }
     else
     {
-        res.status(403).json({
-            authenticated: false
-        });
+        res.status(403).json({});
     }
 });
 
@@ -127,9 +128,7 @@ usersRouter.delete("/:username", isAuthenticated, async (req, res, next) => {
     }
     else
     {
-        res.status(403).json({
-            authenticated: false
-        });
+        res.status(403).json({});
     }
 });
 
