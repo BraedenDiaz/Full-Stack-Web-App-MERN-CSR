@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AboutPage from "./About";
+import ContactPage from "./Contact";
 
 import FileNotFound from "./errors/404";
 import CreateNewForum from "./forums/CreateNewForum";
@@ -39,6 +41,8 @@ function App() {
           <Route path="forums/create" element={<CreateNewForum isLoggingOut={isLoggingOut} alert={alert} setAlert={setAlert} />} />
           <Route path="forums/:forumID" element={<ForumPage isLoggingOut={isLoggingOut} />} />
           <Route path="forums/:forumID/edit" element={<EditForumPage isLoggingOut={isLoggingOut} />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="contact" element={<ContactPage />} />
           <Route path="*" element={<FileNotFound />} />
         </Route>
       </Routes>

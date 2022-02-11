@@ -44,7 +44,7 @@ export default function Layout(props : PropsType)
         });
     };
 
-    useEffect(refreshUserInfo, []);
+    useEffect(refreshUserInfo);
 
     const handleLogout = () => {
         fetch(`${API_ENDPOINT}/logout`, {
@@ -104,10 +104,10 @@ export default function Layout(props : PropsType)
                                 <Link to="/forums" className="nav-link">Forums</Link>
                             </li>
                             <li className="nav-item">
-                                <Link to="#" className="nav-link">About</Link>
+                                <Link to="/about" className="nav-link">About</Link>
                             </li>
                             <li className="nav-item">
-                                <Link to="#" className="nav-link">Contact</Link>
+                                <Link to="contact" className="nav-link">Contact</Link>
                             </li>
                         </ul>
                         <ul className="navbar-nav">
