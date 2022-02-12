@@ -36,7 +36,7 @@ export default function EditForumPage(props : PropsType)
         {
             navigate("/");
         }
-    }, [props.isLoggingOut]);
+    }, [navigate, props.isLoggingOut]);
 
     useEffect(() => {
         getUser()
@@ -72,7 +72,7 @@ export default function EditForumPage(props : PropsType)
             const categoryNames : string[] = Object.keys(Object.fromEntries(responseJSON));
             setCategories(categoryNames);
         });
-    }, []);
+    }, [forumID]);
     
     const handleChange = (event : any) => {
         switch (event.target.name)

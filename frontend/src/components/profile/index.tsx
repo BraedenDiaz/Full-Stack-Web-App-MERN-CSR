@@ -22,7 +22,7 @@ export default function UserAccountPage(props : PropsType)
         {
             navigate("/");
         }
-    });
+    }, [navigate, props.isLoggingOut]);
 
     useEffect(() => {
         getUser()

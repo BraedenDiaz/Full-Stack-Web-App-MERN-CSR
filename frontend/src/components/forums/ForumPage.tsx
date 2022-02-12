@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"
 import { getUser } from "../../api";
 import { deleteAllComments, deleteComment, getComments, insertNewComment, updateComment } from "../../api/Comments";
@@ -50,13 +50,17 @@ export default function ForumPage(props : PropsType)
         }
     ]);
 
-    const getCommentsForForum = () => {
+    // Wrap in a useCallback hook so that the function refers to the same
+    // memory location on each render (unless forumID changes), also because
+    // this function needs to be used in  multiple places besides the useEffect
+    // hook.
+    const getCommentsForForum = useCallback(() => {
         getComments(forumID!)
         .then(responseJSON => {
             setCSRFToken(responseJSON.csrfToken);
             setForumComments(responseJSON.result);
         });
-    };
+    }, [forumID]);
 
     useEffect(() => {
         getUser()
@@ -74,11 +78,11 @@ export default function ForumPage(props : PropsType)
             {
                 setError404(false);
                 setForumInfo(responseObj.json);
+                getCommentsForForum();
             }
         });
 
-        getCommentsForForum();
-    });
+    }, [forumID, getCommentsForForum]);
 
     const handleCommentTextAreaChange = (event : any) => {
         setComment(event.target.value);
