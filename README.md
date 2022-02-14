@@ -78,3 +78,68 @@ Nevertheless, although the website isn't intended for production-level use, it w
 - Ability for users to delete the comments they created on any forum.
 - Ability for forum authors to delete any comment only on the forums that they created.
 - Ability for forum authors to delete all comments only on the forums that they created.
+
+## Run the Web App
+
+This section will explain how to run the web application.
+
+### Prerequisites
+
+The following are required to run this web application:
+
+- NodeJS runtime environment and NPM which you can get on the [NodeJS website](https://nodejs.org/en/download/).
+- A running MongoDB server. The free community version can be downloaded from the [website for MongoDB](https://www.mongodb.com/try/download/community).
+
+### Steps
+
+Perform the following steps to run this web application.
+
+1. Fork/download the files in this GitHub project.
+
+2. In your terminal, change into the `/backend` directory and perform an NPM install to install the dependencies for the back-end.
+
+```
+npm install
+```
+
+3. Change into the `/frontend` directory and do the same.
+
+```
+cd ../frontend
+npm install
+```
+
+4. A `.env` file is provided at `/backend/.env`. This file can be used to set configurations for the back-end such as the web server port, database server information, session configuration, etc.
+
+- If you are running everything on your localhost (web server, MongoDB database server, etc) and don't have any security settings on your MongoDB database server, you do NOT need to change this file.
+
+- If your MongoDB database has security configurations, change the `MONGODB_HOST` environment variable as needed.
+
+- NOTE: The `.env` file is provided in this repository as an example since this is not a production web application. NEVER put the `.env` file or any secrets for an actual production web application in your repository. Instead, add it to your `.gitignore` file for your projects.
+
+5. First, run the back-end for the web application.
+
+```
+cd /backend
+npm run start
+```
+
+6. Next, run the front-end for the web application.
+
+```
+cd ../frontend
+npm run start
+```
+
+This will open the web application in your default web browser and you can now use the application as desired.
+
+7. Use the application.
+
+- Try creating an account and logging in.
+- Navigate to the 'forums' page and try creating a forum.
+- Navigate into the forums you create and add some comments to the forum.
+- Create different user accounts and create forums, add comments, etc.
+- Click on your username in the navigation bar to open a sidebar that will allow you to go to a page where you can edit your account information or delete your account.
+- See if you can access, modify, or edit the accounts, forums, comments of other users by attempting to navigate to their pages or sending modified HTTP requests.
+
+
