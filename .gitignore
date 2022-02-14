@@ -30,7 +30,7 @@
 /backend/node_modules
 
 # development
-/backend/.env
+#/backend/.env
 
 # production
 /backend/build
